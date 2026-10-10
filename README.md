@@ -161,4 +161,5 @@ El equipo documentó cómo se construyó el juego y qué papel tuvo la IA:
 ## Playthrough
 
 https://drive.google.com/file/d/1xihT7pANEKluvspZta81B9pA6awfpQms/view?usp=drive_link
+
 https://youtu.be/8oHrEyueY1A
