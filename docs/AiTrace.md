@@ -25,9 +25,6 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 - **Supuestos (no los especificó el equipo):**
   - Con el arma sobrecalentada se puede seguir disparando; el castigo es solo el reloj.
   - El calor es igual para las 3 armas.
-- **Pruebas:**
-  - 3 tests nuevos en `PlayerTest`: se sobrecalienta y se enfría, el reloj corre ×3 y al acabarse el tiempo muere y el nivel vuelve a 4:00.
-  - Todos los tests pasan (10 + 4 + 4 + 4 + 3), pero contra una imitación de JavaFX y JUnit. **Falta confirmarlos con `mvn test` en JavaFX real.**
 - **Limitaciones:** el equilibrio (+0.25 por disparo y −0.25 por segundo) no se ha probado jugando. Con la Oil Slick, por su cadencia, casi nunca se sobrecalienta.
 - **Commit sugerido:** `Contrarreloj de 4 min por nivel y calentamiento del arma`
 
