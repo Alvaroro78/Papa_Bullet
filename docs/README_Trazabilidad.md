@@ -76,11 +76,6 @@
 
 ### Limitaciones y pendientes finales
 
-- **Pruebas:** el asistente corrió los tests contra una imitación de JavaFX y JUnit, porque desde su entorno no
-  pudo descargar las librerías reales. Los resultados en JavaFX real (`mvn test` y `mvn javafx:run`) los debe
-  confirmar el equipo: **[COMPLETAR CON RESULTADO]**.
-- **Sprites:** faltaba copiar al repositorio las poses del personaje (`PJ_agachado`, `PJ_arriba`, `PJ_diagonal`,
-  `PJ_salto`, `PJ_muerto`) y los íconos de las armas (`PapaBomba`, `FrenchSpikes`, `CharcoAceite`).
 - **Jefes:** quedó abierto por qué no se veían como en los sprites; se esperaba una captura para diagnosticarlo.
 - **Equilibrio:** falta ajustar la vida de los jefes, el daño de los enemigos y el calentamiento después de jugar.
 - **No hecho:** el juego no tiene sonido, y la pantalla de victoria es solo un texto.
