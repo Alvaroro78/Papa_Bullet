@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Text?>
+
+<!-- Vista Game: contenedor donde viven todos los niveles.
+     Capas (de atrás hacia adelante): mosaico -> entidades -> HUD -->
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.papabullet.controller.GameController"
+           stylesheets="@menu.css"
+           styleClass="game-root"
+           prefWidth="800" prefHeight="600">
+
+    <!-- Capa 1: el MOSAICO. Vacío a propósito: el controller de cada nivel
+         lo llena con baldosas de 40x40 (800x600 = 20 columnas x 15 filas).
+         Ej: mosaic.add(baldosa, columna, fila); para cambiar de nivel: mosaic.getChildren().clear(); -->
+    <GridPane fx:id="mosaic" styleClass="mosaic"
+              StackPane.alignment="TOP_LEFT"/>
+
+    <!-- Capa 2: entidades (jugador, enemigos, balas). Van en un Pane y no en el
+         mosaico porque se mueven pixel a pixel, no de casilla en casilla. -->
+    <Pane fx:id="entityLayer" pickOnBounds="false"/>
+
+    <!-- Capa 3: HUD, siempre encima -->
+    <Text fx:id="levelLabel" styleClass="hud-text" text="NIVEL 1"
+          StackPane.alignment="TOP_LEFT" translateX="16" translateY="16"/>
+
+    <Button fx:id="pauseButton" styleClass="wood-button"
+            onAction="#onPauseClicked"
+            prefWidth="110" prefHeight="50"
+            StackPane.alignment="TOP_RIGHT" translateX="-16" translateY="16">
+        <graphic>
+            <Text styleClass="hud-text" text="II"/>
+        </graphic>
+    </Button>
+
+</StackPane>

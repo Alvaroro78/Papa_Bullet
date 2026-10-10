@@ -1,0 +1,106 @@
+/* ===== Fuente pixel (opcional) =====
+   Descarga "Press Start 2P" de Google Fonts y pon el .ttf en una carpeta
+   fonts/ al lado de este CSS. Si no está, se usa Monospaced. */
+@font-face {
+    font-family: "Press Start 2P";
+    src: url("fonts/PressStart2P-Regular.ttf");
+}
+
+/* ===== Fondo: cielo de atardecer (menú y juego) ===== */
+.menu-root,
+.game-root {
+    -fx-background-color: linear-gradient(to bottom,
+        #241a3d 0%,
+        #4b2f5c 35%,
+        #a3505a 65%,
+        #f08c4a 85%,
+        #ffc46b 100%);
+}
+
+/* ===== Suelo: borde oscuro, pasto y tierra ===== */
+.ground {
+    -fx-background-color: #2a1608, #4caf3c, #6a4022;
+    -fx-background-insets: 0, 4 0 0 0, 22 0 0 0;
+}
+
+/* ===== Título dorado con contorno ===== */
+.title-text {
+    -fx-font-family: "Press Start 2P", "Monospaced";
+    -fx-font-size: 44px;
+    -fx-font-weight: bold;
+    -fx-fill: linear-gradient(to bottom, #ffe066 0%, #ffb21a 55%, #e07a10 100%);
+    -fx-stroke: #2a1608;
+    -fx-stroke-width: 3;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 0, 0, 4, 4);
+}
+
+/* ===== Tablas de madera =====
+   3 capas: contorno oscuro, borde inferior (sombra) y la cara de la tabla */
+.wood-button,
+.wood-button:focused {
+    -fx-background-color:
+        #2a1608,
+        #8a5426,
+        linear-gradient(to bottom, #e8b77a 0%, #d39b5c 50%, #b97d42 100%);
+    -fx-background-insets: 0, 4, 4 4 10 4;
+    -fx-background-radius: 0;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.wood-button:hover {
+    -fx-background-color:
+        #2a1608,
+        #9a6030,
+        linear-gradient(to bottom, #f5c88d 0%, #dcaa6c 50%, #c48a4e 100%);
+}
+
+/* Efecto de "hundirse" al hacer clic */
+.wood-button:pressed {
+    -fx-translate-y: 3;
+}
+
+/* Texto de los botones: dorado con contorno, como el título */
+.wood-text {
+    -fx-font-family: "Press Start 2P", "Monospaced";
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-fill: linear-gradient(to bottom, #ffe066 0%, #ffb21a 60%, #e07a10 100%);
+    -fx-stroke: #2a1608;
+    -fx-stroke-width: 2;
+}
+
+/* ===== Cuerdas: franjas repetidas para que se vean trenzadas ===== */
+.rope {
+    -fx-min-width: 10;
+    -fx-pref-width: 10;
+    -fx-min-height: 24;
+    -fx-pref-height: 24;
+    -fx-background-color:
+        #2a1608,
+        linear-gradient(from 0px 0px to 0px 8px, repeat,
+            #e6d3b0 0%, #e6d3b0 50%, #a8875a 50%, #a8875a 100%);
+    -fx-background-insets: 0, 0 2 0 2;
+}
+
+/* ===== Juego: mosaico y HUD ===== */
+/* Las baldosas no dejan huecos entre sí */
+.mosaic {
+    -fx-hgap: 0;
+    -fx-vgap: 0;
+}
+
+/* Texto del HUD (nivel, botón de pausa) */
+.hud-text {
+    -fx-font-family: "Press Start 2P", "Monospaced";
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-fill: #ffe066;
+    -fx-stroke: #2a1608;
+    -fx-stroke-width: 1.5;
+}
+
+/* ===== Pausa: capa oscura semitransparente sobre el juego ===== */
+.pause-overlay {
+    -fx-background-color: rgba(20, 12, 35, 0.65);
+}

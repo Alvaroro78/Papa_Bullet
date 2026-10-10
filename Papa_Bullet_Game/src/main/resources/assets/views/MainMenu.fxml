@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<!-- Main Menu de Papa Bullet: fondo de atardecer, suelo de pasto y tablas de madera colgando -->
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.papabullet.controller.MainMenuController"
+           stylesheets="@menu.css"
+           styleClass="menu-root"
+           prefWidth="800" prefHeight="600">
+
+    <!-- Capa 1: el suelo, pegado abajo -->
+    <Region styleClass="ground"
+            prefHeight="70" maxHeight="70"
+            StackPane.alignment="BOTTOM_CENTER"/>
+
+    <!-- Capa 2: título + tablas, centrados encima del fondo -->
+    <VBox alignment="CENTER" spacing="40">
+        <padding>
+            <Insets bottom="60"/>
+        </padding>
+
+        <Text styleClass="title-text" text="PAPA BULLET"/>
+
+        <!-- Las tablas van en su propio VBox sin espacio, unidas por las cuerdas -->
+        <VBox alignment="CENTER" spacing="0" maxWidth="300">
+
+            <Button fx:id="startButton" styleClass="wood-button"
+                    onAction="#onStartClicked"
+                    prefWidth="300" prefHeight="70">
+                <graphic>
+                    <Text styleClass="wood-text" text="START"/>
+                </graphic>
+            </Button>
+
+            <!-- Cuerdas entre las dos tablas -->
+            <HBox alignment="CENTER" spacing="200">
+                <Region styleClass="rope"/>
+                <Region styleClass="rope"/>
+            </HBox>
+
+            <Button fx:id="skinsButton" styleClass="wood-button"
+                    onAction="#onSkinsClicked"
+                    prefWidth="300" prefHeight="70">
+                <graphic>
+                    <Text styleClass="wood-text" text="SKINS"/>
+                </graphic>
+            </Button>
+
+        </VBox>
+    </VBox>
+
+</StackPane>
