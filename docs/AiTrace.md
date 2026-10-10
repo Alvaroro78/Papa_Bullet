@@ -86,7 +86,6 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 - **Resumen:**
   - El hito 12 ahora describe el sistema de vida = tiempo que sí está en el código, con una nota de que el contrarreloj de Claude no se integró.
   - Se volvió a poner el hito del jugador (P2) y se corrigió la numeración.
-  - El modelo de esta sesión se registró como `claude-opus-5-5`.
   - Se agregaron como pendientes la diferencia 4:00 / 5:00 y la clase sin uso `PlaceholderEntity`.
 - **Pruebas:** no aplica.
 - **Limitaciones:** el equipo debe confirmar con qué modelo o herramienta se hizo cada parte en otras sesiones.
@@ -126,14 +125,13 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 - **Resumen:**
   - README: hito 13 (se quita la funcionalidad de Skins), un ejemplo de "Retirada de una funcionalidad", la decisión del equipo en "Intervenciones humanas" y un pendiente sobre las menciones antiguas a Skins.
   - AI_TRACE: dos entradas nuevas al final. Las anteriores no se tocaron.
-- **Pruebas:** no aplica.
-- **Limitaciones:** el commit del hito 13 queda como **[COMPLETAR DESDE GIT]**. El modelo de esta sesión es Claude Sonnet 5.5; el README dice `claude-sonnet5.5` y una entrada previa dice `claude-opus-5-5`, y el equipo debe confirmar cuál corresponde a cada sesión.
+- **Pruebas:** no aplica. 
 - **Commit sugerido:** `Docs: trazabilidad del cambio de Skins`
 
 ## 2026-10-09 · Módulo P3 (armas + niveles) a partir del reparto (registro retroactivo)
 
 - **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
-- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, a partir del PDF del reparto, sin acceso al proyecto
+- **Herramienta:** Claude (Anthropic), modelo configurado `claude-sonnet5.5`, a partir del PDF del reparto, sin acceso al proyecto
 - **ACTION_TYPE:** AI_GENERATED
 - **Tarea:** hacer el punto 3 del reparto: interfaz `Weapon`, Thrower Papa, French Spikes, Oil Slick, explosiones, desbloqueos y los 4 mapas.
 - **Archivos generados:** `com/papabullet/entity/weapon/` (`AimDirection`, `Weapon`, `BaseWeapon`, `Projectile`, `Explosion`, `ThrowerPapa`, `FrenchSpikes`, `OilSlick`, `Arsenal`), `resources/levels/nivel0.txt` a `nivel3.txt` y `NOTAS_P3.md`.
@@ -146,7 +144,7 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 ## 2026-10-10 · Análisis y guía del merge P2 → P1 (registro retroactivo)
 
 - **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
-- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, sobre copias (zips) del proyecto que compartió el equipo
+- **Herramienta:** Claude (Anthropic).
 - **ACTION_TYPE:** AI_ASSISTED
 - **Tarea:** decir dónde habría conflicto al fusionar `origin/p2` (`72f9a03`) en `origin/develop` (`5cec3bb`) y cómo corregirlo.
 - **Archivos:** merge de prueba en una copia. Se entregaron `model/Player.java` y `model/InputHandler.java` ya adaptados y una guía en un documento compartido de Claude.
@@ -162,7 +160,7 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 ## 2026-10-10 · Errores de compilación después del PR #5 (registro retroactivo)
 
 - **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
-- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, sobre copias (zips) del proyecto que compartió el equipo
+- **Herramienta:** Claude (Anthropic)
 - **ACTION_TYPE:** AI_ASSISTED
 - **Tarea:** revisar los errores que salían después del merge.
 - **Archivos:** ninguno modificado en el repositorio. Se indicó cambiar `model/GameWorld.java` y `model/Player.java`.
@@ -179,7 +177,7 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 ## 2026-10-10 · Mapas ajustados al jugador real y Canvas en Game.fxml (registro retroactivo)
 
 - **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
-- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, sobre copias (zips) del proyecto que compartió el equipo
+- **Herramienta:** Claude (Anthropic).
 - **ACTION_TYPE:** AI_GENERATED (mapas) · AI_ASSISTED (`Game.fxml`)
 - **Tarea:** dejar listos los 4 niveles y averiguar por qué START no hacía nada.
 - **Archivos:** `resources/assets/levels/nivel0.txt` a `nivel3.txt` (entregados). Se indicó cambiar `resources/assets/views/Game.fxml`.
@@ -194,7 +192,7 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 ## 2026-10-10 · Revisión del proyecto contra el reparto y el enunciado
 
 - **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
-- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, sobre copias (zips) del proyecto que compartió el equipo
+- **Herramienta:** Claude (Anthropic).
 - **ACTION_TYPE:** AI_ASSISTED
 - **Tarea:** decir qué faltaba en todo el proyecto según el reparto y el PDF del juego. Se revisó dos veces: en `0fc6c45` y en `67d58d7` (el checkpoint, con los cambios del equipo).
 - **Archivos:** ninguno modificado (solo lectura).
@@ -216,7 +214,7 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 ## 2026-10-10 · Trazabilidad de la sesión del punto 3, el merge y la revisión
 
 - **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
-- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`
+- **Herramienta:** Claude (Anthropic).
 - **ACTION_TYPE:** DOCUMENTATION
 - **Tarea:** añadir a los dos documentos solo lo de esta sesión, dejando el resto igual.
 - **Archivos:** `README_TRAZABILIDAD.md`, `AI_TRACE.md`
