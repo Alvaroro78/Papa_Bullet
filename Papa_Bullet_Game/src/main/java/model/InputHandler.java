@@ -4,9 +4,8 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import structures.HashTable;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +22,7 @@ public class InputHandler {
     private final Set<KeyCode> down = new HashSet<>();
     private final Set<KeyCode> pressedThisFrame = new HashSet<>();
     private final Set<String> typedThisFrame = new HashSet<>();
-    private final Map<KeyCode, Long> order = new HashMap<>();
+    private final HashTable<KeyCode, Long> order = new HashTable<>();
     private long counter;
 
     private final EventHandler<KeyEvent> onPressed = e -> press(e.getCode());

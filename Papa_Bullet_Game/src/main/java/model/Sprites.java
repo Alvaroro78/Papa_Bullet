@@ -3,8 +3,7 @@ package model;
 import javafx.scene.image.Image;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import structures.HashTable;
 
 /**
  * Carga y cachea sprites de {@code resources/assets/sprites/}.
@@ -13,7 +12,7 @@ import java.util.Map;
  * Devuelve null si el archivo no existe => el que dibuja vuelve al rectángulo de color.
  */
 public final class Sprites {
-    private static final Map<String, Image> CACHE = new HashMap<>();
+    private static final HashTable<String, Image> CACHE = new HashTable<>();
     private static final String BASE = "/assets/sprites/";
 
     private Sprites() {}

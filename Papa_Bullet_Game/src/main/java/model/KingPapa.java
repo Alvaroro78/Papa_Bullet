@@ -1,6 +1,7 @@
 package model;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
@@ -30,6 +31,14 @@ public class KingPapa extends Entity {
 
     @Override
     public void render(GraphicsContext gc, Camera cam) {
+        Image img = Sprites.get("Freidora.png", 56, 64);
+        if (img != null) {                       // la freidora, apoyada en el piso; gastada = medio transparente
+            gc.setGlobalAlpha(used ? 0.45 : 1);
+            gc.drawImage(img, Math.round(cam.toScreenX(getCenterX() - img.getWidth() / 2)),
+                    Math.round(cam.toScreenY(y + height - img.getHeight())));
+            gc.setGlobalAlpha(1);
+            return;
+        }
         drawBox(gc, cam, used ? Color.web("#8a7a3a") : Color.web("#f2c230"));
         gc.setFill(Color.web("#3a2208"));
         gc.setFont(Font.font("Monospaced", 12));

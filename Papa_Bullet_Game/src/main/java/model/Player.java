@@ -2,14 +2,14 @@ package model;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -22,34 +22,38 @@ import java.util.List;
  */
 public class Player extends Entity {
 
-    // ---- Ajustes: cámbienlos probando en PlayerSandbox ----
+    // ---- Ajustes: cámbienlos probando en el juego (F1 muestra las cajas de colisión) ----
     public static final double WIDTH = 36, HEIGHT = 60, CROUCH_HEIGHT = 36;
     public static final double SPEED = 200, JUMP_SPEED = 700;
     public static final double JETPACK_HOLD = 3.0, JETPACK_SPEED = 350;
+    public static final int JETPACK_REACH = 8, JETPACK_BOOST = 4; // baldosas: hasta dónde busca piso arriba / cuánto sube si no hay
     public static final double INVULNERABLE_TIME = 1.0;
-    public static final int MAX_HP = 3, RECHARGE = 150;
+    /** Vida. Los enemigos de P4 quitan del orden de 25-50 por golpe; el King Papa devuelve 150. */
+    public static final int MAX_HP = 300, RECHARGE = 150;
+    /** La skin elegida en la pantalla de Skins: prefijo de los sprites + cambio de tono (-1..1, 0 = original). */
     public static String selectedSkin = "PJ";
+    public static double selectedHue = 0;
 
     private static final KeyCode KEY_LEFT = KeyCode.A, KEY_RIGHT = KeyCode.D, KEY_UP = KeyCode.W,
             KEY_DOWN = KeyCode.S, KEY_JUMP = KeyCode.L, KEY_SHOOT = KeyCode.K,
             KEY_SWITCH = KeyCode.Q, KEY_JETPACK = KeyCode.O;
     private static final String KEY_RECHARGE = "ñ"; // JavaFX no tiene KeyCode para la ñ
 
+    private final String skin;
+    private final double hue;
     private final Image[] frames;
 
     private int facing = 1; // 1 derecha, -1 izquierda
     private AimDirection aim = AimDirection.RIGHT;
     private boolean crouching;
-    private double invulnerable, walkTime;
+    private double invulnerable, walkTime, fireCooldown;
 
     private final List<Weapon> weapons = new ArrayList<>();
     private int weaponIndex;
 
-    private Rectangle2D jetZone;   // zona encima: se dibuja la mira roja
+    private Rectangle2D jetZone;   // dónde quedaría al volar (caja del jugador): ahí se dibuja la mira roja
     private Rectangle2D flyTarget; // != null mientras el jetpack lo lleva
     private double jetCharge;
-
-    private int reserve; // lo que da el King Papa (+150): qué es exactamente sigue pendiente en el doc
 
     /** skin = prefijo de los sprites, ej. "PJ" carga PJ_1.png, PJ_2.png... de /assets/sprites/ */
     public Player() {
@@ -63,7 +67,10 @@ public class Player extends Entity {
         this.team = Team.PLAYER;
         this.collidesWithTiles = true;
         this.gravityScale = 1;
+        this.skin = skin;
+        this.hue = selectedHue;
         this.frames = loadFrames(skin);
+        weapons.add(new ThrowerPapa()); // el arma por defecto; las otras se recogen en el nivel
     }
 
     // =====================================================================
@@ -74,7 +81,8 @@ public class Player extends Entity {
     public void update(double dt, GameWorld world) {
         InputHandler input = world.getInput();
         invulnerable = Math.max(0, invulnerable - dt);
-        boolean jump = input.wasPressed(KEY_JUMP), shoot = input.wasPressed(KEY_SHOOT), swap = input.wasPressed(KEY_SWITCH);
+        fireCooldown = Math.max(0, fireCooldown - dt);
+        boolean jump = input.wasPressed(KEY_JUMP), shoot = input.isPressed(KEY_SHOOT), swap = input.wasPressed(KEY_SWITCH);
         boolean recharge = input.wasTyped(KEY_RECHARGE);
 
         if (flyTarget != null) {
@@ -107,10 +115,14 @@ public class Player extends Entity {
 
         // 3. Armas
         if (swap && !weapons.isEmpty()) weaponIndex = (weaponIndex + 1) % weapons.size();
-        if (shoot && !weapons.isEmpty()) weapons.get(weaponIndex).fire(muzzleX(), muzzleY(), aim, world);
+        if (shoot && fireCooldown == 0 && !weapons.isEmpty()) { // K sostenida dispara al ritmo del arma
+            Weapon w = weapons.get(weaponIndex);
+            w.fire(muzzleX(), muzzleY(), aim, world);
+            fireCooldown = w.getCooldown();
+        }
 
-        // 4. Jetpack: en el piso, bajo una zona J, mirando arriba y manteniendo O
-        jetZone = (onGround && aim == AimDirection.UP) ? zoneAbove(world) : null;
+        // 4. Jetpack: en cualquier parte del piso, mirando arriba y manteniendo O
+        jetZone = (onGround && aim == AimDirection.UP) ? landingAbove(world.getLevel()) : null;
         if (jetZone != null && input.isPressed(KEY_JETPACK)) {
             jetCharge += dt;
             if (jetCharge >= JETPACK_HOLD) {
@@ -126,17 +138,18 @@ public class Player extends Entity {
             jetCharge = 0;
         }
 
-        // 5. Recarga: una vez por King Papa
+        // 5. Recarga de vida: una vez por King Papa (si ya está lleno no lo gasta)
         if (recharge) {
             for (KingPapa k : world.getKingPapas()) {
-                if (k.isUsed() && k.getBounds().intersects(getBounds())) {
-                    reserve += RECHARGE;
+                if (!k.isUsed() && hp < MAX_HP && k.getBounds().intersects(getBounds())) {
+                    k.markUsed();
+                    hp = Math.min(MAX_HP, hp + RECHARGE);
                     break;
                 }
             }
         }
 
-        // 6. Física
+        // 6. La física (gravedad y baldosas) la aplica el motor con Collision después de update()
         walkTime = (onGround && vx != 0) ? walkTime + dt : 0;
     }
 
@@ -162,10 +175,8 @@ public class Player extends Entity {
     }
 
     // =====================================================================
-    // Movimiento y colisiones con las baldosas
-    // ponytail: la colisión vive aquí; si P4 la necesita para los enemigos, P1 la sube a Entity.
+    // Agacharse y bajar de plataformas (el resto de la colisión está en Collision)
     // =====================================================================
-
 
     /** true si está parado solo sobre plataformas '=' (de un piso sólido no se puede bajar). */
     private boolean onPlatformOnly(Level level) {
@@ -195,18 +206,31 @@ public class Player extends Entity {
     // Jetpack
     // =====================================================================
 
-    /** La zona J más cercana justo encima de la cabeza, o null. */
-    private Rectangle2D zoneAbove(GameWorld world) {
-        double cx = x + width / 2;
-        Rectangle2D best = null;
-        for (Rectangle2D z : world.getLevel().getJetpackZones()) {
-            boolean above = cx >= z.getMinX() && cx <= z.getMaxX() && z.getMaxY() <= y;
-            if (above && (best == null || z.getMaxY() > best.getMaxY())) best = z;
+    /**
+     * A dónde lo lleva el jetpack: el piso más cercano encima de su cabeza (plataforma '=' o bloque '#'
+     * con espacio libre arriba para pararse), hasta JETPACK_REACH baldosas. Si no hay ninguno,
+     * sube JETPACK_BOOST baldosas y después cae. Devuelve la caja que ocuparía el jugador al llegar.
+     */
+    Rectangle2D landingAbove(Level level) {
+        int T = Config.TILE;
+        int c0 = tile(x), c1 = tile(x + width - 0.001), head = tile(y);
+        for (int r = head - 1; r >= head - JETPACK_REACH; r--) {
+            if (standable(level, c0, c1, r)) return new Rectangle2D(x, r * T - height, width, height);
         }
-        return best;
+        return new Rectangle2D(x, y - JETPACK_BOOST * T, width, height);
     }
 
-    /** Vuela en línea recta hasta dejar los pies en el borde de abajo de la zona. Ignora baldosas. */
+    /** ¿En la fila r hay algo que pisar y encima 2 filas libres (el jugador mide 1.5 baldosas)? */
+    private static boolean standable(Level level, int c0, int c1, int r) {
+        boolean floor = false;
+        for (int c = c0; c <= c1; c++) {
+            if (level.isSolid(c, r - 1) || level.isSolid(c, r - 2)) return false;
+            floor |= level.isSolid(c, r) || level.isPlatform(c, r);
+        }
+        return floor;
+    }
+
+    /** Vuela en línea recta hasta dejar los pies en el borde de abajo del destino. Ignora baldosas. */
     private void fly(double dt) {
         double tx = flyTarget.getMinX() + flyTarget.getWidth() / 2 - width / 2;
         double ty = flyTarget.getMaxY() - height;
@@ -235,9 +259,21 @@ public class Player extends Entity {
         invulnerable = INVULNERABLE_TIME;
     }
 
-    /** P3 lo llama al desbloquear un arma. La primera que se agrega es la de por defecto. */
+    /** Al recoger un arma: si es nueva se agrega, y en ambos casos queda seleccionada. */
     public void addWeapon(Weapon weapon) {
+        for (int i = 0; i < weapons.size(); i++) {
+            if (weapons.get(i).getClass() == weapon.getClass()) {
+                weaponIndex = i;
+                return;
+            }
+        }
         weapons.add(weapon);
+        weaponIndex = weapons.size() - 1;
+    }
+
+    /** Todas las armas recogidas, en orden (para el HUD). */
+    public List<Weapon> getWeapons() {
+        return Collections.unmodifiableList(weapons);
     }
 
     public Weapon getCurrentWeapon() {
@@ -248,10 +284,7 @@ public class Player extends Entity {
     private double muzzleY() { return y + height * 0.4 + AimVector.dy(aim) * height * 0.5; }
 
     public AimDirection getAim() { return aim; }
-    public int getReserve() { return reserve; }
     public boolean isFlying() { return flyTarget != null; }
-
-    /** true solo en el frame en que la tecla se oprime (para no disparar 60 veces por segundo). */
 
     // =====================================================================
     // Dibujo
@@ -268,18 +301,41 @@ public class Player extends Entity {
     }
 
     private void drawBody(GraphicsContext gc) {
-        if (frames.length == 0) { // skin sin sprites: un rectángulo para poder seguir probando
+        Image img = currentImage();
+        if (img == null) { // skin sin sprites: un rectángulo para poder seguir probando
             gc.setFill(Color.ORANGE);
             gc.fillRect(x, y, width, height);
             return;
         }
-        Image img = frames[onGround ? (int) (walkTime * 8) % frames.length : 0];
-        // Los PNG traen borde transparente, por eso se dibujan más grandes que la caja de colisión.
-        // ponytail: agachado se dibuja el mismo sprite aplastado; cambiar cuando haya sprite de agachado.
-        double dh = height * 1.2, dw = dh * img.getWidth() / img.getHeight();
+        // Sprites ya entrega la imagen al tamaño de dibujo; los PNG traen borde transparente,
+        // por eso se ven más grandes que la caja de colisión. Los pies quedan en el borde de abajo.
+        double dw = img.getWidth(), dh = img.getHeight();
         double dx = x + width / 2 - dw / 2, dy = y + height - dh * 0.92;
+        if (hue != 0) gc.setEffect(new ColorAdjust(hue, 0, 0, 0)); // el tono de la skin
         if (facing > 0) gc.drawImage(img, dx, dy, dw, dh);
         else gc.drawImage(img, dx + dw, dy, -dw, dh); // ancho negativo = espejo
+        gc.setEffect(null);
+    }
+
+    /** El dibujo de la pose actual; si esa skin no la tiene, los cuadros de caminar. */
+    private Image currentImage() {
+        String pose = pose();
+        if (pose != null) {
+            double h = pose.equals("muerto") ? HEIGHT * 0.8 : pose.equals("agachado") ? HEIGHT * 0.9 : HEIGHT * 1.2;
+            Image img = Sprites.get(skin + "_" + pose + ".png", HEIGHT * 2.4, h);
+            if (img != null) return img;
+        }
+        return frames.length == 0 ? null : frames[onGround ? (int) (walkTime * 8) % frames.length : 0];
+    }
+
+    /** Qué sprite toca (skin_pose.png). null = caminar / quieto con los cuadros skin_1..4. */
+    String pose() {
+        if (!alive) return "muerto";
+        if (crouching) return "agachado";
+        if (aim == AimDirection.UP) return "arriba";
+        if (aim == AimDirection.UP_LEFT || aim == AimDirection.UP_RIGHT) return "diagonal";
+        if (!onGround || flyTarget != null) return "salto";
+        return null;
     }
 
     private void drawReticle(GraphicsContext gc, Rectangle2D z) {
@@ -295,15 +351,12 @@ public class Player extends Entity {
         }
     }
 
+    /** Carga skin_1.png, skin_2.png... hasta que falte uno. Sprites los escala y los guarda en caché. */
     private static Image[] loadFrames(String skin) {
         List<Image> list = new ArrayList<>();
-        for (int i = 1; ; i++) {
-            try (InputStream in = Player.class.getResourceAsStream("/assets/sprites/" + skin + "_" + i + ".png")) {
-                if (in == null) break;
-                list.add(new Image(in));
-            } catch (IOException e) {
-                break;
-            }
+        for (int i = 1; Player.class.getResource("/assets/sprites/" + skin + "_" + i + ".png") != null; i++) {
+            Image img = Sprites.get(skin + "_" + i + ".png", HEIGHT * 2.4, HEIGHT * 1.2); // alto de dibujo: height * 1.2
+            if (img != null) list.add(img);
         }
         return list.toArray(new Image[0]);
     }

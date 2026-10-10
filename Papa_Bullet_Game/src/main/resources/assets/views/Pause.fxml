@@ -7,25 +7,39 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
-<!-- Menú de pausa: NO es una pantalla nueva, es una capa que se pone ENCIMA de Game.
-     El fondo es negro semitransparente, así el juego se sigue viendo detrás. -->
+<!-- Menú de pausa: una capa ENCIMA de Game. El velo azul noche deja ver el juego detrás
+     pero lo oscurece lo suficiente para que el título y el panel se lean bien. -->
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
            fx:controller="control.PauseController"
            stylesheets="@menu.css"
            styleClass="pause-overlay">
 
-    <VBox alignment="CENTER" spacing="40">
+    <VBox alignment="CENTER" spacing="28">
 
         <Text styleClass="title-text" text="PAUSA"/>
 
-        <VBox alignment="CENTER" spacing="0" maxWidth="300">
+        <VBox styleClass="menu-panel" alignment="CENTER" spacing="0"
+              maxWidth="356" maxHeight="-Infinity">
 
             <Button fx:id="resumeButton" styleClass="wood-button"
                     onAction="#onResumeClicked"
-                    prefWidth="300" prefHeight="70">
+                    prefWidth="300" prefHeight="64">
                 <graphic>
                     <Text styleClass="wood-text" text="CONTINUAR"/>
+                </graphic>
+            </Button>
+
+            <HBox alignment="CENTER" spacing="200">
+                <Region styleClass="rope"/>
+                <Region styleClass="rope"/>
+            </HBox>
+
+            <Button fx:id="restartButton" styleClass="wood-button"
+                    onAction="#onRestartClicked"
+                    prefWidth="300" prefHeight="64">
+                <graphic>
+                    <Text styleClass="wood-text" text="REINICIAR"/>
                 </graphic>
             </Button>
 
@@ -37,7 +51,7 @@
             <!-- "Salir del juego" del diagrama: vuelve al Main Menu -->
             <Button fx:id="exitButton" styleClass="wood-button"
                     onAction="#onExitClicked"
-                    prefWidth="300" prefHeight="70">
+                    prefWidth="300" prefHeight="64">
                 <graphic>
                     <Text styleClass="wood-text" text="SALIR"/>
                 </graphic>

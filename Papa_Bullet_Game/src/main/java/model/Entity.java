@@ -49,6 +49,12 @@ public abstract class Entity {
         if (hp <= 0) alive = false;
     }
 
+    /** Daño sabiendo quién lo causó (bala, explosión, aceite). Por defecto es igual al de arriba;
+     *  el policía con escudo lo sobrescribe para bloquear lo que le llega de frente. */
+    public void takeDamage(int dmg, Entity source) {
+        takeDamage(dmg);
+    }
+
     // ===== hooks opcionales (sobrescribir si hace falta) =====
 
     /** Se llama cuando esta entidad se solapa con {@code other} (solo si ambas siguen vivas). */

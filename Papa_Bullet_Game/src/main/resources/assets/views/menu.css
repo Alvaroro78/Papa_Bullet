@@ -1,47 +1,43 @@
-/* ===== Fuente pixel (opcional) =====
-   Descarga "Press Start 2P" de Google Fonts y pon el .ttf en una carpeta
-   fonts/ al lado de este CSS. Si no está, se usa Monospaced. */
-@font-face {
-    font-family: "Press Start 2P";
-    src: url("fonts/PressStart2P-Regular.ttf");
-}
+/* Estilos de Main Menu, Game (HUD) y Pausa, con la paleta del juego (cielo azul noche, pasto, madera).
+   Contraste medido: texto de las tablas 6:1 o más, título 10:1 sobre el cielo, panel vs fondo 4.6:1 o más.
+   Fuente: si alguien instala "Press Start 2P" en el sistema se usa; si no, Monospaced. */
 
-/* ===== Fondo: cielo de atardecer (menú y juego) ===== */
+/* ===== Fondo de respaldo (el Canvas lo tapa) ===== */
 .menu-root,
 .game-root {
-    -fx-background-color: linear-gradient(to bottom,
-        #241a3d 0%,
-        #4b2f5c 35%,
-        #a3505a 65%,
-        #f08c4a 85%,
-        #ffc46b 100%);
+    -fx-background-color: #0b1640;
 }
 
-/* ===== Suelo: borde oscuro, pasto y tierra ===== */
-.ground {
-    -fx-background-color: #2a1608, #4caf3c, #6a4022;
-    -fx-background-insets: 0, 4 0 0 0, 22 0 0 0;
-}
-
-/* ===== Título dorado con contorno ===== */
+/* ===== Título: dorado con contorno grueso, se lee sobre cielo y sobre nieve ===== */
 .title-text {
     -fx-font-family: "Press Start 2P", "Monospaced";
-    -fx-font-size: 44px;
+    -fx-font-size: 48px;
     -fx-font-weight: bold;
-    -fx-fill: linear-gradient(to bottom, #ffe066 0%, #ffb21a 55%, #e07a10 100%);
-    -fx-stroke: #2a1608;
-    -fx-stroke-width: 3;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 0, 0, 4, 4);
+    -fx-fill: linear-gradient(to bottom, #fff27a 0%, #ffc21a 55%, #ff8a10 100%);
+    -fx-stroke: #1a0c04;
+    -fx-stroke-width: 4;
+    -fx-stroke-type: outside;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 0, 0, 5, 5);
 }
 
-/* ===== Tablas de madera =====
-   3 capas: contorno oscuro, borde inferior (sombra) y la cara de la tabla */
+/* ===== Panel azul noche detrás de las tablas: las separa de cualquier fondo ===== */
+.menu-panel {
+    -fx-background-color: rgba(8, 14, 40, 0.86);
+    -fx-background-radius: 6;
+    -fx-border-color: #ffd24a;
+    -fx-border-width: 3;
+    -fx-border-radius: 6;
+    -fx-padding: 22 28 22 28;
+}
+
+/* ===== Tablas de madera clara =====
+   3 capas: contorno casi negro, borde inferior (sombra) y la cara de la tabla */
 .wood-button,
 .wood-button:focused {
     -fx-background-color:
-        #2a1608,
-        #8a5426,
-        linear-gradient(to bottom, #e8b77a 0%, #d39b5c 50%, #b97d42 100%);
+            #1a0c04,
+            #8a5426,
+            linear-gradient(to bottom, #f0c286 0%, #d9a262 50%, #c48a4e 100%);
     -fx-background-insets: 0, 4, 4 4 10 4;
     -fx-background-radius: 0;
     -fx-padding: 0;
@@ -50,9 +46,9 @@
 
 .wood-button:hover {
     -fx-background-color:
-        #2a1608,
-        #9a6030,
-        linear-gradient(to bottom, #f5c88d 0%, #dcaa6c 50%, #c48a4e 100%);
+            #1a0c04,
+            #9a6030,
+            linear-gradient(to bottom, #ffdcaa 0%, #ebb878 50%, #d69c5c 100%);
 }
 
 /* Efecto de "hundirse" al hacer clic */
@@ -60,47 +56,42 @@
     -fx-translate-y: 3;
 }
 
-/* Texto de los botones: dorado con contorno, como el título */
+/* Texto de las tablas: café casi negro sobre madera clara (antes era dorado sobre madera: 1.4:1) */
 .wood-text {
     -fx-font-family: "Press Start 2P", "Monospaced";
-    -fx-font-size: 22px;
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-fill: linear-gradient(to bottom, #ffe066 0%, #ffb21a 60%, #e07a10 100%);
-    -fx-stroke: #2a1608;
-    -fx-stroke-width: 2;
+    -fx-fill: #2a1205;
 }
 
 /* ===== Cuerdas: franjas repetidas para que se vean trenzadas ===== */
 .rope {
     -fx-min-width: 10;
     -fx-pref-width: 10;
-    -fx-min-height: 24;
-    -fx-pref-height: 24;
+    -fx-min-height: 22;
+    -fx-pref-height: 22;
     -fx-background-color:
-        #2a1608,
-        linear-gradient(from 0px 0px to 0px 8px, repeat,
+            #1a0c04,
+            linear-gradient(from 0px 0px to 0px 8px, repeat,
             #e6d3b0 0%, #e6d3b0 50%, #a8875a 50%, #a8875a 100%);
     -fx-background-insets: 0, 0 2 0 2;
 }
 
-/* ===== Juego: mosaico y HUD ===== */
-/* Las baldosas no dejan huecos entre sí */
-.mosaic {
-    -fx-hgap: 0;
-    -fx-vgap: 0;
-}
-
-/* Texto del HUD (nivel, botón de pausa) */
+/* ===== Juego: HUD ===== */
+/* Texto del HUD (nombre del nivel, botón de pausa): amarillo con contorno POR FUERA de la letra.
+   Con el contorno centrado (lo normal en JavaFX) la línea oscura tapaba el amarillo en letras chicas. */
 .hud-text {
     -fx-font-family: "Press Start 2P", "Monospaced";
-    -fx-font-size: 18px;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-fill: #ffe066;
-    -fx-stroke: #2a1608;
-    -fx-stroke-width: 1.5;
+    -fx-fill: #ffe14a;
+    -fx-stroke: #1a0c04;
+    -fx-stroke-width: 3;
+    -fx-stroke-type: outside;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.8), 0, 0, 2, 2);
 }
 
-/* ===== Pausa: capa oscura semitransparente sobre el juego ===== */
+/* ===== Pausa: velo azul noche sobre el juego (se ve detrás, pero no compite) ===== */
 .pause-overlay {
-    -fx-background-color: rgba(20, 12, 35, 0.65);
+    -fx-background-color: rgba(11, 22, 64, 0.78);
 }

@@ -1,6 +1,7 @@
 package control;
 
 import gui.App;
+import gui.Hud;
 import model.Config;
 import model.GameLoop;
 import model.GameWorld;
@@ -71,7 +72,7 @@ public class GameController implements PauseHandler {
             else detach();
         });
 
-        // P5: aquí se registra el HUD ->  addOverlay(new Hud());
+        addOverlay(new Hud());
     }
 
     /** P5: registra capas que se dibujan encima del mundo (HUD). */

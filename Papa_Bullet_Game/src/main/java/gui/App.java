@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import model.Config;
 
 import java.io.IOException;
 
@@ -14,7 +15,6 @@ import java.io.IOException;
  * Saltarse el menú (dev):    mvn javafx:run -Djavafx.args="--game"
  */
 public class App extends Application {
-    public static final int WIDTH = 800, HEIGHT = 600;
     private static Stage stage;
 
     @Override
@@ -31,10 +31,12 @@ public class App extends Application {
 
     public static void showGame() { show("/assets/views/Game.fxml"); }
 
+    public static void showSkins() { show("/assets/views/Skins.fxml"); }
+
     private static void show(String fxml) {
         try {
             Parent root = FXMLLoader.load(App.class.getResource(fxml));
-            stage.setScene(new Scene(root, WIDTH, HEIGHT));
+            stage.setScene(new Scene(root, Config.WIDTH, Config.HEIGHT));
             stage.sizeToScene();
         } catch (IOException e) {
             throw new IllegalStateException("No se pudo cargar " + fxml, e);

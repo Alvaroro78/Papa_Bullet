@@ -1,24 +1,16 @@
 package model;
 
-import javafx.scene.paint.Color;
+import structures.HashTable;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * Qué clase nace con cada letra del mapa. Mientras no existan las clases reales hay
- * placeholders (rectángulos). CUANDO TU CLASE ESTÉ LISTA cambia SOLO TU LÍNEA en registerDefaults():
- *
- *   P2:  register('P', Player::new);
- *   P4:  register('R', PoliceBaton::new);  register('G', PoliceGun::new);  register('S', PoliceShield::new);
- *        register('H', Helicopter::new);   register('B', () -> bossForLevel(...)) (ver nota abajo)
- *
- * Nota jefes: hay un jefe distinto por nivel. Si P4 necesita saber el nivel, puede leerlo en su
- * constructor con {@code EntityRegistry.currentLevelIndex()}.
+ * Qué clase nace con cada letra del mapa (ver LevelLoader para la lista de letras).
+ * Para agregar un tipo nuevo: una línea register(letra, Clase::new) y la letra en LevelLoader.
+ * El jefe sabe de qué nivel es con currentLevelIndex (lo fija GameWorld al cargar).
  */
 public final class EntityRegistry {
-    private static final Map<Character, Supplier<Entity>> FACTORIES = new HashMap<>();
+    private static final HashTable<Character, Supplier<Entity>> FACTORIES = new HashTable<>();
     private static int currentLevelIndex;
 
     static {
@@ -31,13 +23,16 @@ public final class EntityRegistry {
         // --- P2 ---
         register('P', Player::new);
         // --- P4 ---
-        register('R', () -> new PlaceholderEntity("R", Color.web("#2f4f9f"), 30, 52, 3, false, false));
-        register('G', () -> new PlaceholderEntity("G", Color.web("#3a6fbf"), 30, 52, 3, false, false));
-        register('S', () -> new PlaceholderEntity("S", Color.web("#1d2f66"), 36, 52, 6, false, false));
-        register('H', () -> new PlaceholderEntity("H", Color.web("#7a7f99"), 72, 36, 4, true, false));
-        register('B', () -> new PlaceholderEntity("BOSS", Color.web("#b02a2a"), 100, 140, 30, false, true));
+        register('R', PoliceBaton::new);
+        register('G', PolicePistol::new);
+        register('S', PoliceShield::new);
+        register('H', Helicopter::new);
+        register('B', () -> new Boss(currentLevelIndex)); // un jefe distinto por nivel
         // --- P1 ---
         register('K', KingPapa::new);
+        // --- P3: armas para recoger ---
+        register('F', () -> new WeaponPickUp(FrenchSpikes::new));
+        register('A', () -> new WeaponPickUp(OilSlick::new));
     }
 
     public static void register(char letter, Supplier<Entity> factory) {

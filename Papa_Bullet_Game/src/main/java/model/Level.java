@@ -19,19 +19,24 @@ public class Level {
     /** Una letra de entidad del mapa y su baldosa (col, fila). */
     public record Spawn(char letter, int col, int row) {}
 
+    /** Mensaje del tutorial: se muestra mientras el jugador está desde esa columna hasta el siguiente mensaje. */
+    public record Hint(int col, String text) {}
+
     private final String name;
     private final char[][] tiles; // [fila][col]: '#', '=' o '.'
     private final int cols, rows;
     private final List<Spawn> spawns;
     private final List<Rectangle2D> jetpackZones;
+    private final List<Hint> hints;
 
-    Level(String name, char[][] tiles, List<Spawn> spawns, List<Rectangle2D> jetpackZones) {
+    Level(String name, char[][] tiles, List<Spawn> spawns, List<Rectangle2D> jetpackZones, List<Hint> hints) {
         this.name = name;
         this.tiles = tiles;
         this.rows = tiles.length;
         this.cols = rows == 0 ? 0 : tiles[0].length;
         this.spawns = spawns;
         this.jetpackZones = jetpackZones;
+        this.hints = hints;
     }
 
     public String getName() { return name; }
@@ -43,6 +48,15 @@ public class Level {
 
     /** Zonas 'J' (una caja por tramo horizontal de letras J), en píxeles del mundo. */
     public List<Rectangle2D> getJetpackZones() { return Collections.unmodifiableList(jetpackZones); }
+
+    /** El mensaje del tutorial que toca en la posición x (píxeles), o null si no hay. */
+    public String hintAt(double x) {
+        String text = null;
+        for (Hint h : hints) {                   // vienen ordenados por columna
+            if (h.col() * Config.TILE <= x) text = h.text();
+        }
+        return text;
+    }
 
     public char tileAt(int col, int row) {
         if (col < 0 || col >= cols) return '#';        // paredes laterales
@@ -70,8 +84,8 @@ public class Level {
                 char ch = tiles[r][c];
                 if (ch == '.') continue;
                 double sx = Math.round(cam.toScreenX(c * t)), sy = Math.round(cam.toScreenY(r * t));
-                if (ch == '#') drawSolid(gc, sx, sy, t, isSolid(c, r - 1));
-                else drawPlatform(gc, sx, sy, t);
+                if (ch == '#') drawSolid(gc, sx, sy, t, c, r);
+                else drawPlatform(gc, sx, sy, t, c);
             }
         }
     }
@@ -84,23 +98,59 @@ public class Level {
         }
     }
 
-    private static void drawSolid(GraphicsContext gc, double sx, double sy, int t, boolean coveredAbove) {
-        gc.setFill(Color.web("#5a5663"));          // concreto roto
+    // Roca café con pasto encima, como los acantilados de Contra 4. Las piedras salen de
+    // Background.rnd(col, fila): siempre las mismas en la misma baldosa (no titilan).
+    private static final Color[] ROCK = {Color.web("#8a5a2c"), Color.web("#7a4e26"), Color.web("#6a4320")};
+    private static final Color STONE = Color.web("#5c3a1b"), STONE_LIT = Color.web("#a8723c"), EDGE = Color.web("#3e2510");
+    private static final Color GRASS = Color.web("#3c9c32"), GRASS_LIT = Color.web("#7bd052"), GRASS_DARK = Color.web("#2a7524");
+
+    private void drawSolid(GraphicsContext gc, double sx, double sy, int t, int c, int r) {
+        int depth = 0;                                       // cuántas baldosas sólidas hay encima (más hondo = más oscuro)
+        while (depth < ROCK.length - 1 && isSolid(c, r - depth - 1)) depth++;
+        gc.setFill(ROCK[depth]);
         gc.fillRect(sx, sy, t, t);
-        gc.setFill(Color.web("#3c3945"));          // sombra inferior / derecha
-        gc.fillRect(sx, sy + t - 4, t, 4);
-        gc.fillRect(sx + t - 4, sy, 4, t);
-        if (!coveredAbove) {                        // borde superior claro: se lee como "suelo"
-            gc.setFill(Color.web("#8c8796"));
-            gc.fillRect(sx, sy, t, 5);
+
+        for (int k = 0; k < 3; k++) {                        // piedras
+            double rx = sx + 3 + Background.rnd(c * 31 + k, r) * (t - 14);
+            double ry = sy + 12 + Background.rnd(r * 17 + k, c) * (t - 22);
+            double size = 5 + Background.rnd(c + r * 7, k) * 5;
+            gc.setFill(STONE);
+            gc.fillRect(Math.round(rx), Math.round(ry), size, size * 0.7);
+            gc.setFill(STONE_LIT);
+            gc.fillRect(Math.round(rx), Math.round(ry), size, 2);
         }
+        gc.setFill(EDGE);                                    // borde oscuro donde la roca termina
+        if (!isSolid(c - 1, r)) gc.fillRect(sx, sy, 3, t);
+        if (!isSolid(c + 1, r)) gc.fillRect(sx + t - 3, sy, 3, t);
+        if (!isSolid(c, r + 1) && r + 1 < rows) gc.fillRect(sx, sy + t - 3, t, 3);
+
+        if (!isSolid(c, r - 1)) drawGrass(gc, sx, sy, t, c, 10);
     }
 
-    private static void drawPlatform(GraphicsContext gc, double sx, double sy, int t) {
-        gc.setFill(Color.web("#c98b3c"));
-        gc.fillRect(sx, sy, t, 8);
-        gc.setFill(Color.web("#7a4f1a"));
-        gc.fillRect(sx, sy + 8, t, 3);
+    /** Plataforma '=': un borde de pasto con tierra colgando. */
+    private void drawPlatform(GraphicsContext gc, double sx, double sy, int t, int c) {
+        gc.setFill(ROCK[1]);
+        gc.fillRect(sx, sy + 8, t, 6);
+        for (int bx = 0; bx < t; bx += 5) {                  // tierra que cuelga
+            gc.setFill(ROCK[2]);
+            gc.fillRect(sx + bx, sy + 14, 5, 1 + Background.rnd(c * 9 + bx, 5) * 5);
+        }
+        drawGrass(gc, sx, sy, t, c, 8);
+    }
+
+    private static void drawGrass(GraphicsContext gc, double sx, double sy, int t, int c, int thick) {
+        gc.setFill(GRASS);
+        gc.fillRect(sx, sy, t, thick);
+        gc.setFill(GRASS_LIT);
+        gc.fillRect(sx, sy, t, 3);
+        for (int bx = 0; bx < t; bx += 4) {
+            gc.setFill(GRASS_DARK);                          // hojas que caen sobre la roca
+            gc.fillRect(sx + bx, sy + thick, 4, 1 + Background.rnd(c * 13 + bx, 1) * 6);
+            if (Background.rnd(c * 11 + bx, 2) > 0.6) {      // matitas que sobresalen arriba (solo se ven, no chocan)
+                gc.setFill(GRASS_LIT);
+                gc.fillRect(sx + bx, sy - 3, 2, 3);
+            }
+        }
     }
 
     // ===== utilidades para el LevelLoader =====
