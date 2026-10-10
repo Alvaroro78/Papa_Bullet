@@ -34,10 +34,9 @@
 ### Herramientas de IA utilizadas
 
 - **Claude (Anthropic)**, en sesiones de agente con acceso a una **copia** del proyecto. El modelo configurado es
-  `claude-opus-5-5`. El asistente no tenía acceso al repositorio oficial, así que no hizo commits ni push: entregó
+  `claude-sonnet5`. El asistente no tenía acceso al repositorio oficial, así que no hizo commits ni push: entregó
   los archivos y el equipo los integró y los subió.
-- **"Ponytail"**: un modo de trabajo del asistente que exige la solución más simple que funcione. El equipo lo pidió
-  para mantener el mismo nivel de complejidad en todo el código.
+
 - Otras herramientas de IA usadas por los demás integrantes: **[COMPLETAR POR EL EQUIPO]**.
 
 ### Ejemplos de tareas donde la IA fue relevante
