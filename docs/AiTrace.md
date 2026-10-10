@@ -129,3 +129,101 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 - **Pruebas:** no aplica.
 - **Limitaciones:** el commit del hito 13 queda como **[COMPLETAR DESDE GIT]**. El modelo de esta sesión es Claude Sonnet 5.5; el README dice `claude-sonnet5.5` y una entrada previa dice `claude-opus-5-5`, y el equipo debe confirmar cuál corresponde a cada sesión.
 - **Commit sugerido:** `Docs: trazabilidad del cambio de Skins`
+
+## 2026-10-09 · Módulo P3 (armas + niveles) a partir del reparto (registro retroactivo)
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
+- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, a partir del PDF del reparto, sin acceso al proyecto
+- **ACTION_TYPE:** AI_GENERATED
+- **Tarea:** hacer el punto 3 del reparto: interfaz `Weapon`, Thrower Papa, French Spikes, Oil Slick, explosiones, desbloqueos y los 4 mapas.
+- **Archivos generados:** `com/papabullet/entity/weapon/` (`AimDirection`, `Weapon`, `BaseWeapon`, `Projectile`, `Explosion`, `ThrowerPapa`, `FrenchSpikes`, `OilSlick`, `Arsenal`), `resources/levels/nivel0.txt` a `nivel3.txt` y `NOTAS_P3.md`.
+- **Nota:** registro retroactivo. Ocurrió antes del checkpoint validado y se agrega al final a pedido del equipo, sin editar lo anterior.
+- **Resumen:** se escribió según la estructura del reparto (`com.papabullet`, `Level.isSolidAt`, `Camera.getX`). Los mapas se generaron con un script que valida un solo `P` y un solo `B` y que ningún enemigo quede flotando.
+- **Pruebas:** se compiló contra versiones de prueba del motor y de JavaFX; pasaron 20 pruebas simuladas (daño, enfriamiento, alcance de las espinas, charco sobre el piso, cambio y desbloqueo de armas).
+- **Limitaciones:** el código de armas **no se integró**: el proyecto real usa el paquete `model` y la interfaz `Weapon` de P2. El integrante pidió después ir paso a paso. Los mapas sí se usaron (ver más abajo).
+- **Commit sugerido:** no aplica.
+
+## 2026-10-10 · Análisis y guía del merge P2 → P1 (registro retroactivo)
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
+- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, sobre copias (zips) del proyecto que compartió el equipo
+- **ACTION_TYPE:** AI_ASSISTED
+- **Tarea:** decir dónde habría conflicto al fusionar `origin/p2` (`72f9a03`) en `origin/develop` (`5cec3bb`) y cómo corregirlo.
+- **Archivos:** merge de prueba en una copia. Se entregaron `model/Player.java` y `model/InputHandler.java` ya adaptados y una guía en un documento compartido de Claude.
+- **Nota:** registro retroactivo. Ocurrió antes del checkpoint validado y se agrega al final a pedido del equipo, sin editar lo anterior.
+- **Resumen:**
+  - Git marcaba 2 conflictos (`Entity` y `GameWorld`, add/add). Había 4 más que no marcaba: `control/InputHandler` duplicado, `Player` hecho contra la interfaz `GameWorld` de P2, `PlayerSandbox` y la letra `P` creando el `DebugPlayer`.
+  - Se dejaron los contratos de P1. A `InputHandler` de P1 se le agregó `pressOrder()`, y a `Player` se le quitó su física propia, porque si no, el motor lo movía dos veces por frame.
+  - El zip "que ofrece" estaba en la rama local `p3`; se usó `origin/p2`.
+- **Pruebas:** el paquete `model` compiló contra versiones de prueba de JavaFX. Una simulación sin ventana pasó 7 pruebas: la `P` crea el `Player`, queda en el piso, camina 200 px/s, salta, vuelve al piso, apunta con `pressOrder` y se dibuja con la cámara.
+- **Limitaciones:** el merge real lo hizo el equipo en GitHub (PR #5, `5e9a2e9`) y no siguió la guía en `GameWorld` (ver la entrada siguiente).
+- **Commit sugerido:** `Merge p2 en develop: Player sobre el motor de P1`
+
+## 2026-10-10 · Errores de compilación después del PR #5 (registro retroactivo)
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
+- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, sobre copias (zips) del proyecto que compartió el equipo
+- **ACTION_TYPE:** AI_ASSISTED
+- **Tarea:** revisar los errores que salían después del merge.
+- **Archivos:** ninguno modificado en el repositorio. Se indicó cambiar `model/GameWorld.java` y `model/Player.java`.
+- **Nota:** registro retroactivo. Ocurrió antes del checkpoint validado y se agrega al final a pedido del equipo, sin editar lo anterior.
+- **Resumen:** 4 problemas.
+  - `GameWorld` quedó como la interfaz de P2. Se recupera con `git checkout 5cec3bb -- .../model/GameWorld.java`. Este causaba 6 de los 7 errores.
+  - Faltaba `Player.selectedSkin`.
+  - Faltaba `this.frames = loadFrames(skin);` en el constructor.
+  - La recarga del King Papa estaba invertida (`k.isUsed()` sin `!`) y no se marcaba como usado.
+- **Pruebas:** con los 4 cambios, el paquete `model` compiló y la simulación anterior volvió a pasar.
+- **Limitaciones:** según Git, `GameWorld` vuelve a ser clase en `b5b3a00` (PR #6), `pressOrder` entra en `208600a` y la recarga se corrige en `47f1d6f`.
+- **Commit sugerido:** `Corrige el merge de p2: GameWorld de P1 y recarga del King Papa`
+
+## 2026-10-10 · Mapas ajustados al jugador real y Canvas en Game.fxml (registro retroactivo)
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
+- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, sobre copias (zips) del proyecto que compartió el equipo
+- **ACTION_TYPE:** AI_GENERATED (mapas) · AI_ASSISTED (`Game.fxml`)
+- **Tarea:** dejar listos los 4 niveles y averiguar por qué START no hacía nada.
+- **Archivos:** `resources/assets/levels/nivel0.txt` a `nivel3.txt` (entregados). Se indicó cambiar `resources/assets/views/Game.fxml`.
+- **Nota:** registro retroactivo. Ocurrió antes del checkpoint validado y se agrega al final a pedido del equipo, sin editar lo anterior.
+- **Resumen:**
+  - Con el salto real del jugador (unas 3 baldosas) algunos enemigos y King Papa no se alcanzaban. Se bajaron plataformas y las zonas `J` se pusieron encima de las repisas.
+  - START lanzaba `NullPointerException` en `GameController.java:65`, porque `Game.fxml` todavía tenía el `GridPane` de la plantilla. Se reemplazó por `<Canvas fx:id="canvas" width="800" height="600">` y se agregó `fx:id="root"`.
+- **Pruebas:** un script de alcance dio "todo alcanzable" en los 4 mapas. En el motor del proyecto, los 4 cargan con el jugador en el piso, y el jetpack lo deja en la repisa (pies en y = 200).
+- **Limitaciones:** según Git, los 4 `.txt` de `bc003e5` (PR #7) son idénticos a los entregados, y el `Canvas` también entra en ese commit. En `47f1d6f` pasan a `.json` sin cambiar ninguna baldosa.
+- **Commit sugerido:** `Niveles 0 a 3 y Canvas en Game.fxml`
+
+## 2026-10-10 · Revisión del proyecto contra el reparto y el enunciado
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
+- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`, sobre copias (zips) del proyecto que compartió el equipo
+- **ACTION_TYPE:** AI_ASSISTED
+- **Tarea:** decir qué faltaba en todo el proyecto según el reparto y el PDF del juego. Se revisó dos veces: en `0fc6c45` y en `67d58d7` (el checkpoint, con los cambios del equipo).
+- **Archivos:** ninguno modificado (solo lectura).
+- **Resumen:**
+  - Se jugaron los 4 niveles en una simulación sin ventana: cada jefe pasa al siguiente nivel y el último llega a juego completado.
+  - Ya corregido por el equipo en `67d58d7`: `mvn javafx:run` (el `mainClass` pasó a `gui.App`) y el nombre del nivel 2.
+  - Pendientes:
+    - las armas no se conservan entre niveles y Acesi no trae ninguna para recoger, así que en el nivel final solo hay Thrower Papa;
+    - no hay desbloqueo progresivo;
+    - el jetpack funciona en cualquier parte y el PDF dice que solo en ciertas zonas;
+    - desde `ea2ad5c` el mapa del nivel 2 es casi igual al del 3 (11 baldosas distintas);
+    - no hay helicópteros en el nivel 1;
+    - policías y helicóptero no tienen sprite.
+  - Por confirmar con el profesor: qué es el "+150 sec" del King Papa, y la tecla Ñ, que no existe en teclados en inglés.
+- **Pruebas:** compilación de `model` y `gui/Hud` contra versiones de prueba de JavaFX, y la simulación de los 4 niveles.
+- **Limitaciones:** en la copia que compartió el equipo estaban borrados, sin commit, `.mvn/wrapper/maven-wrapper.jar` y `.properties`. Se avisó que `git add .` los borraría del repositorio. Los pendientes siguen abiertos salvo que el equipo los haya cerrado después: **[COMPLETAR DESDE GIT]**.
+- **Commit sugerido:** no aplica.
+
+## 2026-10-10 · Trazabilidad de la sesión del punto 3, el merge y la revisión
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1 (integrante a cargo de P3)
+- **Herramienta:** Claude (Anthropic), modelo configurado `claude-opus-5-5`
+- **ACTION_TYPE:** DOCUMENTATION
+- **Tarea:** añadir a los dos documentos solo lo de esta sesión, dejando el resto igual.
+- **Archivos:** `README_TRAZABILIDAD.md`, `AI_TRACE.md`
+- **Resumen:**
+  - README: hitos 14 a 16 y una nota sobre ellos, el modelo de esta sesión, ejemplos nuevos (depuración, resolución de merge, diseño de niveles, revisión contra el enunciado) e intervenciones humanas.
+  - AI_TRACE: estas 6 entradas al final.
+  - Los commits se verificaron en el historial de Git del zip.
+- **Pruebas:** no aplica.
+- **Limitaciones:** las 4 primeras entradas son retroactivas (anteriores al checkpoint). El equipo debe confirmar si los pendientes siguen abiertos.
+- **Commit sugerido:** `Docs: trazabilidad del punto 3, el merge P2 → P1 y la revisión del proyecto`
