@@ -49,7 +49,6 @@
   - el texto del nivel no se leía porque el contorno se dibujaba encima del relleno;
   - el aceite no le pegaba a un policía que caminaba;
   - un error de compilación por un `LevelLoader` desactualizado.
-- **Pruebas:** tests de JUnit para el apuntado, el King Papa, las poses, el jetpack, la cadencia, las armas, los enemigos, los niveles JSON, la `HashTable`, el tema por nivel, el calentamiento y el contrarreloj.
 - **Documentación:** el reparto del trabajo, cómo integrar las partes, los mensajes de commit sugeridos y esta sección.
 
 ### Intervenciones humanas importantes
