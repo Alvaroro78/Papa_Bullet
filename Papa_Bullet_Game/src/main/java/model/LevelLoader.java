@@ -15,7 +15,7 @@ import java.util.List;
  *
  * <pre>
  * {
- *   "nombre": "UNIVALLE",            // lo que muestra el juego (opcional)
+ *   "nombre": "UVAVALLE",            // lo que muestra el juego (opcional)
  *   "mapa": [                        // una letra por baldosa de 40x40, una fila por texto
  *     "#......#",
  *     "########"
@@ -38,7 +38,7 @@ public final class LevelLoader {
     /** Mapa de reserva si aún no existe el .json de un nivel. */
     public static final String FALLBACK = "prueba";
 
-    private static final String[] DEFAULT_NAMES = {"UNIVALLE", "AYTONOMA", "JABERUMBA", "ACESI"};
+    private static final String[] DEFAULT_NAMES = {"UVAVALLE", "AYTONOMA", "JABERUMBA", "ACESI"};
     private static final String ENTITY_LETTERS = "PRGSHBKJFA";
 
     private LevelLoader() {}
@@ -54,6 +54,7 @@ public final class LevelLoader {
             lv = load(FALLBACK);
         }
         if (lv == null) throw new IllegalStateException("No hay ni " + file + ".json ni " + FALLBACK + ".json");
+        lv.setTheme(Theme.ALL[index % Theme.ALL.length]); // cada nivel con su fondo y su terreno
         return lv;
     }
 
