@@ -91,3 +91,41 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 - **Pruebas:** no aplica.
 - **Limitaciones:** el equipo debe confirmar con qué modelo o herramienta se hizo cada parte en otras sesiones.
 - **Commit sugerido:** `Docs: actualiza trazabilidad y AI_TRACE tras revisar el código del equipo`
+
+## 2026-10-10 · Guía para quitar la funcionalidad de Skins
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1
+- **Herramienta:** Claude (Anthropic), modelo Claude Sonnet 5.5, sobre el zip del repositorio que compartió el equipo
+- **ACTION_TYPE:** AI_ASSISTED
+- **Tarea:** el equipo pidió quitar la funcionalidad de skins y un paso a paso para hacerlo.
+- **Archivos:** el asistente **no modificó ninguno** (solo leyó una copia extraída del zip). Los archivos que se indicó cambiar al equipo son:
+  - borrar `src/main/java/control/SkinController.java` y `src/main/resources/assets/views/Skins.fxml`;
+  - `src/main/java/gui/App.java`: quitar `showSkins()`;
+  - `src/main/resources/assets/views/MainMenu.fxml`: quitar el botón SKINS (y revisar las cuerdas `rope` que quedan sueltas);
+  - `src/main/java/control/MainMenuController.java`: quitar `onSkinsClicked()` y dibujar al personaje fijo con `PJ_1.png`, sin tono;
+  - `src/main/java/model/Player.java`: quitar `selectedSkin`, `selectedHue`, el campo `hue` y su efecto `ColorAdjust` en `drawBody`; el constructor vacío pasa a `this("PJ")`.
+- **Resumen:**
+  - Se buscó "skin" en todo el proyecto y se encontraron 5 puntos de contacto: la pantalla (`SkinController` y `Skins.fxml`), el botón del menú (`MainMenu.fxml` y `MainMenuController`), `App.showSkins()`, las variables estáticas de `Player` y la escena del menú, que dibuja al personaje con el tono elegido.
+  - Se indicó dejar los sprites `PJ_*.png`, porque son el personaje, y el campo `skin` y el constructor `Player(String)`, porque `loadFrames` y `currentImage` los usan.
+  - Se indicó correr `./mvnw clean compile`, porque `target/classes` conserva copias de `Skins.fxml` y `SkinController.class`.
+  - **Hallazgo:** `Skins.fxml` apuntaba a `control.SkinsController`, pero la clase se llama `SkinController`; la pantalla de Skins probablemente no abría. Al borrar ambos archivos el problema desaparece.
+  - Primero se dio una guía larga; ante un fallo de visualización del equipo se repitió en versión corta. El contenido es el mismo.
+- **Pruebas:** no se compiló ni se ejecutó nada. Se recomendó al equipo probar que el menú abra, que START funcione y que el personaje se vea con su color original en el menú y en el juego.
+- **Limitaciones:**
+  - Está por confirmar que el equipo aplicó los cambios y cuál es el commit: **[COMPLETAR DESDE GIT]**.
+  - Los textos anteriores de la trazabilidad que mencionan la pantalla de Skins describen el estado previo del proyecto y no se editaron.
+- **Commit sugerido:** `Quita la funcionalidad de Skins`
+
+## 2026-10-10 · Actualización de trazabilidad por el cambio de Skins
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1
+- **Herramienta:** Claude (Anthropic), modelo Claude Sonnet 5.5
+- **ACTION_TYPE:** DOCUMENTATION
+- **Tarea:** añadir a los dos documentos solo lo ocurrido en la sesión de Skins, dejando el resto igual.
+- **Archivos:** `README_TRAZABILIDAD.md`, `AI_TRACE.md`
+- **Resumen:**
+  - README: hito 13 (se quita la funcionalidad de Skins), un ejemplo de "Retirada de una funcionalidad", la decisión del equipo en "Intervenciones humanas" y un pendiente sobre las menciones antiguas a Skins.
+  - AI_TRACE: dos entradas nuevas al final. Las anteriores no se tocaron.
+- **Pruebas:** no aplica.
+- **Limitaciones:** el commit del hito 13 queda como **[COMPLETAR DESDE GIT]**. El modelo de esta sesión es Claude Sonnet 5.5; el README dice `claude-sonnet5.5` y una entrada previa dice `claude-opus-5-5`, y el equipo debe confirmar cuál corresponde a cada sesión.
+- **Commit sugerido:** `Docs: trazabilidad del cambio de Skins`
