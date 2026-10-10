@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Text?>
 
@@ -10,22 +9,17 @@
      Capas (de atrás hacia adelante): mosaico -> entidades -> HUD -->
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
+           fx:id="root"
            fx:controller="control.GameController"
            stylesheets="@menu.css"
            styleClass="game-root"
            prefWidth="800" prefHeight="600">
 
-    <!-- Capa 1: el MOSAICO. Vacío a propósito: el controller de cada nivel
-         lo llena con baldosas de 40x40 (800x600 = 20 columnas x 15 filas).
-         Ej: mosaic.add(baldosa, columna, fila); para cambiar de nivel: mosaic.getChildren().clear(); -->
-    <GridPane fx:id="mosaic" styleClass="mosaic"
-              StackPane.alignment="TOP_LEFT"/>
+    <!-- Capa 1: el juego. GameController dibuja aquí las baldosas y todas las entidades. -->
+    <Canvas fx:id="canvas" width="800" height="600"
+            StackPane.alignment="TOP_LEFT"/>
 
-    <!-- Capa 2: entidades (jugador, enemigos, balas). Van en un Pane y no en el
-         mosaico porque se mueven pixel a pixel, no de casilla en casilla. -->
-    <Pane fx:id="entityLayer" pickOnBounds="false"/>
-
-    <!-- Capa 3: HUD, siempre encima -->
+    <!-- Capa 2: HUD, siempre encima -->
     <Text fx:id="levelLabel" styleClass="hud-text" text="NIVEL 1"
           StackPane.alignment="TOP_LEFT" translateX="16" translateY="16"/>
 
