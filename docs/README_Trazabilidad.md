@@ -36,7 +36,7 @@
   `claude-sonnet5`. El asistente no tenía acceso al repositorio oficial, así que no hizo commits ni push: entregó
   los archivos y el equipo los integró y los subió.
 
-- Otras herramientas de IA usadas por los demás integrantes: **[COMPLETAR POR EL EQUIPO]**.
+- Otras herramientas de IA usadas por los demás integrantes: **Gemini**.
 
 ### Ejemplos de tareas donde la IA fue relevante
 
