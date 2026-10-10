@@ -38,7 +38,7 @@
 
 - **Claude (Anthropic)**, en sesiones de agente con acceso a una **copia** del proyecto. El modelo configurado es
   `claude-sonnet5.5`. El asistente no tenía acceso al repositorio oficial, así que no hizo commits ni push: entregó
-  los archivos y el equipo los integró y los subió.
+  los archivos y el equipo los revisó, vio que podía integrar y los subió.
 
 - Otras herramientas de IA usadas por los demás integrantes: **Gemini**.
 
