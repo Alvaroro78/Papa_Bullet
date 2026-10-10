@@ -30,6 +30,7 @@
 | 10 | Fondo y terreno distintos por nivel (`Theme`): selva, desierto, ciudad de noche y volcán | 1f05dcc |
 | 11 | Nombres corregidos: el nivel 0 pasa a **UVAVALLE** y el nivel 2 vuelve a **JABERUMBA**. **Checkpoint validado:** "Fondos personalizados x nivel y corrección de nombres" | 1f05dcc |
 | 12 | **Vida = tiempo** y calentamiento de la máquina, hecho por el equipo. La vida es un contador de 300 s que baja solo; los golpes quitan segundos y cada disparo calienta la máquina (Thrower +0.15, Spikes +0.2, Oil +0.3; se enfría 0.12 por segundo). Con más calor el contador baja más rápido, hasta ×4 con la máquina al rojo. El King Papa pasa a ser un **carrito de cholado** que devuelve +150 s y enfría la máquina. | ac5b802 |
+| 13 | **Se quita la funcionalidad de Skins.** Se elimina la pantalla de Skins (`SkinController` y `Skins.fxml`), el botón SKINS del menú principal y el cambio de tono del jugador (`Player.selectedSkin` y `Player.selectedHue`). El personaje queda fijo con los sprites `PJ_*`. El asistente revisó el proyecto y guió los pasos; los cambios en el código los aplica el equipo. | 4c0ce91 |
  
 > **Sobre el hito 12.** El asistente también generó su propia versión: reloj aparte de 4:00, calor fijo de +0.25 y
 > reloj ×3 con el arma sobrecalentada. **Esa versión no quedó en el código**, porque el repositorio ya tenía la del
@@ -55,6 +56,9 @@
 - **Revisión de integración:** se comparó el código del equipo con la copia del asistente. Así se detectó que el
   sistema de vida = tiempo del equipo y el contrarreloj del asistente eran dos versiones de lo mismo, y se
   decidió no integrar el del asistente.
+- **Retirada de una funcionalidad:** el asistente buscó en el proyecto todo lo que dependía de las skins (pantalla,
+  botón del menú, tono del jugador y la escena del menú) y dio el paso a paso para quitarla sin romper el resto.
+  Al revisar también vio que `Skins.fxml` apuntaba a `control.SkinsController` y la clase se llama `SkinController`.
 - **Documentación:**
   - el reparto del trabajo, cómo integrar las partes y los mensajes de commit sugeridos;
   - la explicación en lenguaje sencillo del rol de cada clase y de cómo funciona la `HashTable`.
@@ -65,7 +69,8 @@
   - el King Papa recupera **+150**, que ahora son segundos del contador porque la vida es tiempo;
   - **morir siempre reinicia el nivel**;
   - las armas se **desbloquean al recogerlas**;
-  - el tiempo es parte del reto, y el calentamiento de la máquina hace que se acabe más rápido.
+  - el tiempo es parte del reto, y el calentamiento de la máquina hace que se acabe más rápido;
+  - **se quita la funcionalidad de skins**: el equipo pidió el paso a paso y es quien aplica los cambios en el código.
 - **Diseño propio de un integrante:** el sistema de vida = tiempo con calor por arma y el carrito de cholado, que es
   la versión que quedó en el juego. Herramienta usada: **[COMPLETAR POR EL EQUIPO]**.
 - **Reglas de código:** los `enum` en Java solo llevan constantes, sin métodos. El asistente tuvo que rehacer
@@ -84,9 +89,3 @@
 - **Integración:** juntar el código de los 5 integrantes en el repositorio, resolver versiones desactualizadas de
   `LevelLoader` y `EntityRegistry`, elegir qué versión del tiempo y el calor se quedaba, y hacer los commits y el push.
 
-
-### Limitaciones y pendientes finales
-
-- **Jefes:** quedó abierto por qué no se veían como en los sprites; se esperaba una captura para diagnosticarlo.
-- **Equilibrio:** falta ajustar la vida de los jefes, el daño de los enemigos y el calentamiento después de jugar.
-- **No hecho:** el juego no tiene sonido, y la pantalla de victoria es solo un texto.
