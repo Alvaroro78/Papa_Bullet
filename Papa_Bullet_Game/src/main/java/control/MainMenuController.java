@@ -5,7 +5,6 @@ import gui.App;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import model.Background;
 import model.Camera;
@@ -13,7 +12,6 @@ import model.Config;
 import model.KingPapa;
 import model.Level;
 import model.LevelLoader;
-import model.Player;
 import model.Sprites;
 
 
@@ -46,11 +44,9 @@ public class MainMenuController {
 
 
         double cliffTop = 12 * Config.TILE;
-        Image pj = Sprites.get(Player.selectedSkin + "_1.png", 160, 80);
+        Image pj = Sprites.get("PJ_1.png", 160, 80);
         if (pj != null) {
-            if (Player.selectedHue != 0) gc.setEffect(new ColorAdjust(Player.selectedHue, 0, 0, 0));
             gc.drawImage(pj, 34, cliffTop - pj.getHeight() * 0.92);
-            gc.setEffect(null);
         }
         KingPapa.drawCart(gc, Config.WIDTH - 62, cliffTop, false, 0);
     }
@@ -71,9 +67,6 @@ public class MainMenuController {
     }
 
 
-    @FXML private void onSkinsClicked() {
-        App.showSkins();
-    }
 }
 
 

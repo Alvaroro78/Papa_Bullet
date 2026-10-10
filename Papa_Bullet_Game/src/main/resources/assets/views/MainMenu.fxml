@@ -34,18 +34,6 @@
                 </graphic>
             </Button>
 
-            <HBox alignment="CENTER" spacing="200">
-                <Region styleClass="rope"/>
-                <Region styleClass="rope"/>
-            </HBox>
-
-            <Button fx:id="skinsButton" styleClass="wood-button"
-                    onAction="#onSkinsClicked"
-                    prefWidth="300" prefHeight="70">
-                <graphic>
-                    <Text styleClass="wood-text" text="SKINS"/>
-                </graphic>
-            </Button>
 
         </VBox>
     </VBox>

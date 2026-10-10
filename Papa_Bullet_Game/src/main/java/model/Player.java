@@ -3,7 +3,6 @@ package model;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
@@ -41,9 +40,6 @@ public class Player extends Entity {
     public static final int MAX_HP = 300, RECHARGE = 150;
     /** Calor (0..1): cuánto enfría por segundo y cuánto más rápido baja el contador al máximo calor (1 + 3 = x4). */
     public static final double COOL_RATE = 0.12, MAX_EXTRA_DRAIN = 3;
-    /** La skin elegida en la pantalla de Skins: prefijo de los sprites + cambio de tono (-1..1, 0 = original). */
-    public static String selectedSkin = "PJ";
-    public static double selectedHue = 0;
 
 
     private static final KeyCode KEY_LEFT = KeyCode.A, KEY_RIGHT = KeyCode.D, KEY_UP = KeyCode.W,
@@ -53,7 +49,6 @@ public class Player extends Entity {
 
 
     private final String skin;
-    private final double hue;
     private final Image[] frames;
 
 
@@ -77,7 +72,7 @@ public class Player extends Entity {
 
     /** skin = prefijo de los sprites, ej. "PJ" carga PJ_1.png, PJ_2.png... de /assets/sprites/ */
     public Player() {
-        this(selectedSkin);
+        this("PJ");
     }
 
 
@@ -89,7 +84,6 @@ public class Player extends Entity {
         this.collidesWithTiles = true;
         this.gravityScale = 1;
         this.skin = skin;
-        this.hue = selectedHue;
         this.frames = loadFrames(skin);
         weapons.add(new ThrowerPapa()); // el arma por defecto; las otras se recogen en el nivel
     }
@@ -416,7 +410,6 @@ public class Player extends Entity {
         // por eso se ven más grandes que la caja de colisión. Los pies quedan en el borde de abajo.
         double dw = img.getWidth(), dh = img.getHeight();
         double dx = x + width / 2 - dw / 2, dy = y + height - dh * 0.92;
-        if (hue != 0) gc.setEffect(new ColorAdjust(hue, 0, 0, 0)); // el tono de la skin
         if (facing > 0) gc.drawImage(img, dx, dy, dw, dh);
         else gc.drawImage(img, dx + dw, dy, -dw, dh); // ancho negativo = espejo
         gc.setEffect(null);

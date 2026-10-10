@@ -31,8 +31,6 @@ public class App extends Application {
 
     public static void showGame() { show("/assets/views/Game.fxml"); }
 
-    public static void showSkins() { show("/assets/views/Skins.fxml"); }
-
     private static void show(String fxml) {
         try {
             Parent root = FXMLLoader.load(App.class.getResource(fxml));
