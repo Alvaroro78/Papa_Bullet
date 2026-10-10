@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<!-- Main Menu: detrás, el mismo paisaje del juego (lo pinta MainMenuController en el Canvas);
+     encima, el título y un panel oscuro con las tablas, para que se lean sobre cualquier fondo -->
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="control.MainMenuController"
+           stylesheets="@menu.css"
+           styleClass="menu-root"
+           prefWidth="800" prefHeight="600">
+
+    <Canvas fx:id="background" width="800" height="600"/>
+
+    <VBox alignment="TOP_CENTER" spacing="36" translateY="70">
+
+        <Text styleClass="title-text" text="PAPA BULLET"/>
+
+        <VBox styleClass="menu-panel" alignment="CENTER" spacing="0"
+              maxWidth="356" maxHeight="-Infinity">
+
+            <Button fx:id="startButton" styleClass="wood-button"
+                    onAction="#onStartClicked"
+                    prefWidth="300" prefHeight="70">
+                <graphic>
+                    <Text styleClass="wood-text" text="START"/>
+                </graphic>
+            </Button>
+
+
+        </VBox>
+    </VBox>
+
+</StackPane>
