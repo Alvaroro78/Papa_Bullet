@@ -10,7 +10,7 @@
      Capas (de atrás hacia adelante): mosaico -> entidades -> HUD -->
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
-           fx:controller="com.papabullet.controller.GameController"
+           fx:controller="control.GameController"
            stylesheets="@menu.css"
            styleClass="game-root"
            prefWidth="800" prefHeight="600">

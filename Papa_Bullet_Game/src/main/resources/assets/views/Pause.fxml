@@ -11,7 +11,7 @@
      El fondo es negro semitransparente, así el juego se sigue viendo detrás. -->
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
-           fx:controller="com.papabullet.controller.PauseController"
+           fx:controller="control.PauseController"
            stylesheets="@menu.css"
            styleClass="pause-overlay">
 

@@ -11,7 +11,7 @@
 <!-- Main Menu de Papa Bullet: fondo de atardecer, suelo de pasto y tablas de madera colgando -->
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
-           fx:controller="com.papabullet.controller.MainMenuController"
+           fx:controller="control.MainMenuController"
            stylesheets="@menu.css"
            styleClass="menu-root"
            prefWidth="800" prefHeight="600">
