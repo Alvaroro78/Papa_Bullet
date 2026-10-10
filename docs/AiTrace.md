@@ -39,3 +39,55 @@ Formato de cada entrada: fecha · participante · herramienta · tipo · tarea �
 - **Pruebas:** no aplica.
 - **Limitaciones:** el equipo debe completar las fechas y hashes desde Git y las herramientas de IA usadas por los demás integrantes.
 - **Commit sugerido:** `Docs: trazabilidad del desarrollo y AI_TRACE`
+
+## 2026-10-10 · Revisión del código del equipo: el contrarreloj de Claude no se integra
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1
+- **Herramienta:** Claude (Anthropic), sobre el zip del repositorio que compartió el equipo
+- **ACTION_TYPE:** AI_ASSISTED
+- **Tarea:** revisar el estado real del proyecto antes de explicar las clases.
+- **Archivos:** ninguno modificado (solo lectura).
+- **Resumen:**
+  - Al comparar el zip con la copia del asistente se vio que el equipo ya tenía su propio sistema en `Player`, `Weapon`, `KingPapa` y `Hud`:
+    - **vida = tiempo**: un contador de 300 s que baja 1 s por segundo y al que los golpes le quitan segundos;
+    - **calor por arma** (`Weapon.getHeat`: Thrower 0.15, Spikes 0.2, Oil 0.3; enfría 0.12/s), que hace bajar el contador hasta ×4 (1 + 3·calor²);
+    - el **King Papa como carrito de cholado**, que da +150 s y deja el calor en 0.
+  - Se recomendó **no copiar** los archivos de la entrada "Contrarreloj y calentamiento del arma" (`Player`, `GameWorld`, `Hud`, `PlayerTest`), porque reemplazarían el sistema del equipo. Esa entrada queda como registro de lo que se generó, **no de lo que está en el juego**.
+  - También se vio que `PlaceholderEntity` ya no lo usa ninguna clase y que `EntityRegistry` crea el `Boss` real. Con eso se descarta que el problema de cómo se ven los jefes venga del jefe de relleno.
+- **Pruebas:** no aplica.
+- **Limitaciones:**
+  - No se sabe qué herramienta usó el integrante que hizo el sistema de vida = tiempo: **[COMPLETAR POR EL EQUIPO]**.
+  - Hay que verificar en Git qué versión contiene el commit `ac5b802`.
+  - La conversación decía 4:00 por nivel y el código tiene 300 s (5:00); hay que confirmar el valor final.
+- **Commit sugerido:** no aplica (no hay cambios de código).
+
+## 2026-10-10 · Explicación de las clases y de la HashTable
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1
+- **Herramienta:** Claude (Anthropic)
+- **ACTION_TYPE:** DOCUMENTATION
+- **Tarea:** explicar en términos sencillos qué hace cada clase y cuál es su rol en el juego, y cómo funciona la `HashTable`, para la exposición del equipo.
+- **Archivos:** ninguno modificado. La explicación quedó en el chat.
+- **Resumen:**
+  - Las 47 clases quedaron explicadas por grupos: arranque y pantallas, motor, niveles, jugador, armas y enemigos.
+  - La `HashTable` se explicó con la analogía de un mueble de lockers: `hashCode mod capacidad`, colisiones resueltas con listas enlazadas y duplicar la capacidad al pasar de 0.75.
+  - Se dieron sus 4 usos reales en el juego: `Sprites`, `EntityRegistry`, `InputHandler` y `JsonReader`.
+- **Pruebas:** no aplica.
+- **Limitaciones:** la explicación describe el código del zip revisado; si el código cambia, hay que actualizarla.
+- **Commit sugerido:** no aplica.
+
+## 2026-10-10 · Actualización de README de trazabilidad y AI_TRACE
+
+- **PARTICIPANT_ID:** Los 4 Fantasticos + 1
+- **Herramienta:** Claude (Anthropic)
+- **ACTION_TYPE:** DOCUMENTATION
+- **Tarea:** poner al día ambos documentos con lo último de la conversación, partiendo de la versión que editó el equipo (que ya tenía hashes de commits).
+- **Archivos:** `README_TRAZABILIDAD.md`, `AI_TRACE.md` (solo se agregaron entradas al final; las anteriores quedan intactas)
+- **Resumen:**
+  - El hito 12 ahora describe el sistema de vida = tiempo que sí está en el código, con una nota de que el contrarreloj de Claude no se integró.
+  - Se volvió a poner el hito del jugador (P2) y se corrigió la numeración.
+  - El modelo de esta sesión se registró como `claude-opus-5-5`.
+  - Se agregaron como pendientes la diferencia 4:00 / 5:00 y la clase sin uso `PlaceholderEntity`.
+- **Pruebas:** no aplica.
+- **Limitaciones:** el equipo debe confirmar con qué modelo o herramienta se hizo cada parte en otras sesiones.
+- **Commit sugerido:** `Docs: actualiza trazabilidad y AI_TRACE tras revisar el código del equipo`
