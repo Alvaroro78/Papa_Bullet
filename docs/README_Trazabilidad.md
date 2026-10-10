@@ -19,17 +19,16 @@
 | # | Hito | Commit / fecha |
 |---|------|----------------|
 | 1 | Vistas: menú principal con tablas de madera y paisaje, vista de juego con un Canvas donde viven los niveles y menú de pausa con el juego visible detrás | [COMPLETAR DESDE GIT] |
-| 2 | Reparto del trabajo en 5 módulos (P1 a P5) con contratos entre ellos (`Weapon`, `Entity`, `Overlay`) | [COMPLETAR DESDE GIT] |
-| 3 | Jugador (P2): apuntar en 8 direcciones, agacharse, saltar y bajar de plataformas, cambiar de arma, recargar vida con el King Papa (+150), jetpack y poses del sprite | [COMPLETAR DESDE GIT] |
-| 4 | Pasada de afinado: se corrigió que el King Papa nunca recargaba y se listó lo que faltaba | [COMPLETAR DESDE GIT] |
-| 5 | `HashTable` propia en `structures`, niveles en `.json` con lector JSON propio, y menús con el mismo estilo y colores de buen contraste | [COMPLETAR DESDE GIT] |
-| 6 | Armas (Thrower Papa, French Spikes, Oil Slick) que se desbloquean al recogerlas, enemigos (3 policías y helicóptero), 4 jefes, HUD, tutorial en el nivel 0 y pantalla de Skins | [COMPLETAR DESDE GIT] |
-| 7 | Correcciones: nombre del nivel legible en el HUD (CSS) y constructor de `Level` que no coincidía con un `LevelLoader` desactualizado | [COMPLETAR DESDE GIT] |
-| 8 | Jetpack sin zonas: funciona en cualquier parte del nivel | [COMPLETAR DESDE GIT] |
-| 9 | Cadencia de disparo por arma: Thrower 0.6 s, Spikes 0.9 s y Oil 1.4 s. Con K sostenida dispara a ese ritmo | [COMPLETAR DESDE GIT] |
-| 10 | Fondo y terreno distintos por nivel (`Theme`): selva, desierto, ciudad de noche y volcán | [COMPLETAR DESDE GIT] |
-| 11 | Nombres corregidos: el nivel 0 pasa a **UVAVALLE** y el nivel 2 vuelve a **JABERUMBA**. **Checkpoint validado:** "Fondos personalizados x nivel y corrección de nombres" | [COMPLETAR DESDE GIT] |
-| 12 | Contrarreloj de 4:00 por nivel y calentamiento del arma: con el arma sobrecalentada el reloj corre 3 veces más rápido | [COMPLETAR DESDE GIT] |
+| 2 | Reparto del trabajo en 5 módulos (P1 a P5) con contratos entre ellos (`Weapon`, `Entity`, `Overlay`) | N/A |
+| 3 | Pasada de afinado: se corrigió que el King Papa nunca recargaba y se listó lo que faltaba | 47f1d6f |
+| 4 | `HashTable` propia en `structures`, niveles en `.json` con lector JSON propio, y menús con el mismo estilo y colores de buen contraste | 47f1d6f |
+| 6 | Armas (Thrower Papa, French Spikes, Oil Slick) que se desbloquean al recogerlas, enemigos (3 policías y helicóptero), 4 jefes, HUD, tutorial en el nivel 0 y pantalla de Skins | 47f1d6f |
+| 6 | Correcciones: nombre del nivel legible en el HUD (CSS) y constructor de `Level` que no coincidía con un `LevelLoader` desactualizado | ea2ad5c|
+| 7 | Jetpack sin zonas: funciona en cualquier parte del nivel | 7826e93 |
+| 8 | Cadencia de disparo por arma: Thrower 0.6 s, Spikes 0.9 s y Oil 1.4 s. Con K sostenida dispara a ese ritmo | 7826e93 |
+| 9 | Fondo y terreno distintos por nivel (`Theme`): selva, desierto, ciudad de noche y volcán | 1f05dcc |
+| 10 | Nombres corregidos: el nivel 0 pasa a **UVAVALLE** y el nivel 2 vuelve a **JABERUMBA**. **Checkpoint validado:** "Fondos personalizados x nivel y corrección de nombres" | 1f05dcc |
+| 11 | Contrarreloj de 4:00 por nivel y calentamiento del arma: con el arma sobrecalentada el reloj corre 3 veces más rápido | ac5b802 |
 
 ### Herramientas de IA utilizadas
 
