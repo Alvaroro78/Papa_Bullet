@@ -16,6 +16,7 @@
     -fx-fill: linear-gradient(to bottom, #fff27a 0%, #ffc21a 55%, #ff8a10 100%);
     -fx-stroke: #1a0c04;
     -fx-stroke-width: 4;
+    -fx-stroke-type: outside;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 0, 0, 5, 5);
 }
 
@@ -77,14 +78,17 @@
 }
 
 /* ===== Juego: HUD ===== */
-/* Texto del HUD (nivel, botón de pausa) */
+/* Texto del HUD (nombre del nivel, botón de pausa): amarillo con contorno POR FUERA de la letra.
+   Con el contorno centrado (lo normal en JavaFX) la línea oscura tapaba el amarillo en letras chicas. */
 .hud-text {
     -fx-font-family: "Press Start 2P", "Monospaced";
-    -fx-font-size: 18px;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-fill: #ffe066;
+    -fx-fill: #ffe14a;
     -fx-stroke: #1a0c04;
-    -fx-stroke-width: 1.5;
+    -fx-stroke-width: 3;
+    -fx-stroke-type: outside;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.8), 0, 0, 2, 2);
 }
 
 /* ===== Pausa: velo azul noche sobre el juego (se ve detrás, pero no compite) ===== */

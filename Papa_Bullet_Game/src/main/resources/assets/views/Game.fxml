@@ -29,7 +29,7 @@
             prefWidth="110" prefHeight="50"
             StackPane.alignment="TOP_RIGHT" translateX="-16" translateY="16">
         <graphic>
-            <Text styleClass="hud-text" text="II"/>
+            <Text styleClass="wood-text" text="II"/>
         </graphic>
     </Button>
 

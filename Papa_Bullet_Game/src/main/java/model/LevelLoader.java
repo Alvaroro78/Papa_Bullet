@@ -19,11 +19,14 @@ import java.util.List;
  *   "mapa": [                        // una letra por baldosa de 40x40, una fila por texto
  *     "#......#",
  *     "########"
+ *   ],
+ *   "mensajes": [                    // opcional: textos del tutorial (ver Level.hintAt)
+ *     { "col": 2, "texto": "A / D para caminar" }
  *   ]
  * }
  * </pre>
  * Letras: . aire | # suelo | = plataforma | P jugador | R/G/S policía porra/pistola/escudo |
- *         H helicóptero | B jefe | K King Papa | J zona de jetpack
+ *         H helicóptero | B jefe | K King Papa | J zona de jetpack | F French Spikes | A Oil Slick (aceite)
  *
  *  - Filas de distinto largo se rellenan con aire a la derecha.
  *  - Si el mapa tiene menos de 15 filas se rellena con aire ARRIBA (queda pegado al fondo).
@@ -36,7 +39,7 @@ public final class LevelLoader {
     public static final String FALLBACK = "prueba";
 
     private static final String[] DEFAULT_NAMES = {"UNIVALLE", "AYTONOMA", "JABERUMBA", "ACESI"};
-    private static final String ENTITY_LETTERS = "PRGSHBKJ";
+    private static final String ENTITY_LETTERS = "PRGSHBKJFA";
 
     private LevelLoader() {}
 
@@ -76,12 +79,27 @@ public final class LevelLoader {
         }
         List<String> rows = new ArrayList<>();
         for (Object row : mapa) rows.add(String.valueOf(row));
+        List<Level.Hint> hints = new ArrayList<>();
+        if (obj.get("mensajes") instanceof List<?> msgs) {
+            for (Object m : msgs) {
+                if (!(m instanceof HashTable<?, ?> entry)) continue;
+                HashTable<String, Object> h = (HashTable<String, Object>) entry;
+                if (h.get("col") instanceof Double col && h.get("texto") instanceof String text) {
+                    hints.add(new Level.Hint(col.intValue(), text));
+                }
+            }
+            hints.sort((a, b) -> Integer.compare(a.col(), b.col()));
+        }
         Object name = obj.get("nombre");
-        return parse(name instanceof String n ? n : defaultName(fileName), rows);
+        return parse(name instanceof String n ? n : defaultName(fileName), rows, hints);
     }
 
-    /** Arma el Level a partir de las filas del mapa. */
+    /** Arma el Level a partir de las filas del mapa (sin mensajes de tutorial). */
     public static Level parse(String displayName, List<String> rowsText) {
+        return parse(displayName, rowsText, List.of());
+    }
+
+    public static Level parse(String displayName, List<String> rowsText, List<Level.Hint> hints) {
         if (rowsText.isEmpty()) throw new IllegalArgumentException("Nivel vacío: " + displayName);
 
         int cols = rowsText.stream().mapToInt(String::length).max().getAsInt();
@@ -109,7 +127,7 @@ public final class LevelLoader {
             }
         }
         List<Rectangle2D> zones = Level.mergeRuns(jTiles);
-        return new Level(displayName, tiles, spawns, zones);
+        return new Level(displayName, tiles, spawns, zones, hints);
     }
 
     /**

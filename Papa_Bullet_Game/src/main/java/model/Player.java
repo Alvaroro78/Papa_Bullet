@@ -2,6 +2,7 @@ package model;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
@@ -28,13 +29,17 @@ public class Player extends Entity {
     public static final double INVULNERABLE_TIME = 1.0;
     /** Vida. Los enemigos de P4 quitan del orden de 25-50 por golpe; el King Papa devuelve 150. */
     public static final int MAX_HP = 300, RECHARGE = 150;
+    /** La skin elegida en la pantalla de Skins: prefijo de los sprites + cambio de tono (-1..1, 0 = original). */
     public static String selectedSkin = "PJ";
+    public static double selectedHue = 0;
 
     private static final KeyCode KEY_LEFT = KeyCode.A, KEY_RIGHT = KeyCode.D, KEY_UP = KeyCode.W,
             KEY_DOWN = KeyCode.S, KEY_JUMP = KeyCode.L, KEY_SHOOT = KeyCode.K,
             KEY_SWITCH = KeyCode.Q, KEY_JETPACK = KeyCode.O;
     private static final String KEY_RECHARGE = "ñ"; // JavaFX no tiene KeyCode para la ñ
 
+    private final String skin;
+    private final double hue;
     private final Image[] frames;
 
     private int facing = 1; // 1 derecha, -1 izquierda
@@ -61,7 +66,10 @@ public class Player extends Entity {
         this.team = Team.PLAYER;
         this.collidesWithTiles = true;
         this.gravityScale = 1;
+        this.skin = skin;
+        this.hue = selectedHue;
         this.frames = loadFrames(skin);
+        weapons.add(new ThrowerPapa()); // el arma por defecto; las otras se recogen en el nivel
     }
 
     // =====================================================================
@@ -232,9 +240,16 @@ public class Player extends Entity {
         invulnerable = INVULNERABLE_TIME;
     }
 
-    /** P3 lo llama al desbloquear un arma. La primera que se agrega es la de por defecto. */
+    /** Al recoger un arma: si es nueva se agrega, y en ambos casos queda seleccionada. */
     public void addWeapon(Weapon weapon) {
+        for (int i = 0; i < weapons.size(); i++) {
+            if (weapons.get(i).getClass() == weapon.getClass()) {
+                weaponIndex = i;
+                return;
+            }
+        }
         weapons.add(weapon);
+        weaponIndex = weapons.size() - 1;
     }
 
     /** Todas las armas recogidas, en orden (para el HUD). */
@@ -267,18 +282,41 @@ public class Player extends Entity {
     }
 
     private void drawBody(GraphicsContext gc) {
-        if (frames.length == 0) { // skin sin sprites: un rectángulo para poder seguir probando
+        Image img = currentImage();
+        if (img == null) { // skin sin sprites: un rectángulo para poder seguir probando
             gc.setFill(Color.ORANGE);
             gc.fillRect(x, y, width, height);
             return;
         }
-        Image img = frames[onGround ? (int) (walkTime * 8) % frames.length : 0];
-        // Los PNG traen borde transparente, por eso se dibujan más grandes que la caja de colisión.
-        // ponytail: agachado se dibuja el mismo sprite aplastado; cambiar cuando haya sprite de agachado.
-        double dh = height * 1.2, dw = dh * img.getWidth() / img.getHeight();
+        // Sprites ya entrega la imagen al tamaño de dibujo; los PNG traen borde transparente,
+        // por eso se ven más grandes que la caja de colisión. Los pies quedan en el borde de abajo.
+        double dw = img.getWidth(), dh = img.getHeight();
         double dx = x + width / 2 - dw / 2, dy = y + height - dh * 0.92;
+        if (hue != 0) gc.setEffect(new ColorAdjust(hue, 0, 0, 0)); // el tono de la skin
         if (facing > 0) gc.drawImage(img, dx, dy, dw, dh);
         else gc.drawImage(img, dx + dw, dy, -dw, dh); // ancho negativo = espejo
+        gc.setEffect(null);
+    }
+
+    /** El dibujo de la pose actual; si esa skin no la tiene, los cuadros de caminar. */
+    private Image currentImage() {
+        String pose = pose();
+        if (pose != null) {
+            double h = pose.equals("muerto") ? HEIGHT * 0.8 : pose.equals("agachado") ? HEIGHT * 0.9 : HEIGHT * 1.2;
+            Image img = Sprites.get(skin + "_" + pose + ".png", HEIGHT * 2.4, h);
+            if (img != null) return img;
+        }
+        return frames.length == 0 ? null : frames[onGround ? (int) (walkTime * 8) % frames.length : 0];
+    }
+
+    /** Qué sprite toca (skin_pose.png). null = caminar / quieto con los cuadros skin_1..4. */
+    String pose() {
+        if (!alive) return "muerto";
+        if (crouching) return "agachado";
+        if (aim == AimDirection.UP) return "arriba";
+        if (aim == AimDirection.UP_LEFT || aim == AimDirection.UP_RIGHT) return "diagonal";
+        if (!onGround || flyTarget != null) return "salto";
+        return null;
     }
 
     private void drawReticle(GraphicsContext gc, Rectangle2D z) {

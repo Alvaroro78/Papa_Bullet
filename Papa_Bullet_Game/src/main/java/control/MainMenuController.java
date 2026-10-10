@@ -4,6 +4,7 @@ import gui.App;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import model.Background;
 import model.Camera;
@@ -19,7 +20,6 @@ import java.util.List;
 /**
  * Menú principal. El fondo es el mismo paisaje del juego (Background + baldosas de Level),
  * pintado una sola vez en el Canvas que está detrás de los botones.
- * P5: SKINS -> Skins.fxml y Player.selectedSkin.
  */
 public class MainMenuController {
 
@@ -27,21 +27,27 @@ public class MainMenuController {
 
     @FXML
     private void initialize() {
-        GraphicsContext gc = background.getGraphicsContext2D();
+        paintScenery(background.getGraphicsContext2D(), true);
+    }
+
+    /** Paisaje de los menús: fondo, piso con un acantilado a cada lado y (opcional) el científico y la freidora. */
+    static void paintScenery(GraphicsContext gc, boolean withCharacters) {
         Camera cam = new Camera();
         Background.render(gc, cam);
-        Level ground = LevelLoader.parse("MENU", groundRows());
-        ground.render(gc, cam);
+        LevelLoader.parse("MENU", groundRows()).render(gc, cam);
+        if (!withCharacters) return;
 
-        // el científico en el acantilado de la izquierda y la freidora en el de la derecha
         double cliffTop = 12 * Config.TILE;
         Image pj = Sprites.get(Player.selectedSkin + "_1.png", 160, 80);
-        if (pj != null) gc.drawImage(pj, 34, cliffTop - pj.getHeight() * 0.92);
+        if (pj != null) {
+            if (Player.selectedHue != 0) gc.setEffect(new ColorAdjust(Player.selectedHue, 0, 0, 0));
+            gc.drawImage(pj, 34, cliffTop - pj.getHeight() * 0.92);
+            gc.setEffect(null);
+        }
         Image fryer = Sprites.get("Freidora.png", 56, 64);
         if (fryer != null) gc.drawImage(fryer, Config.WIDTH - 90, cliffTop - fryer.getHeight());
     }
 
-    /** Piso con un acantilado a cada lado (3 baldosas de ancho, una más alto). */
     private static List<String> groundRows() {
         List<String> rows = new ArrayList<>();
         for (int r = 0; r < 12; r++) rows.add("....................");
@@ -56,6 +62,6 @@ public class MainMenuController {
     }
 
     @FXML private void onSkinsClicked() {
-        // TODO(P5): abrir Skins.fxml
+        App.showSkins();
     }
 }

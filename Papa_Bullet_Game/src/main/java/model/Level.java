@@ -19,19 +19,24 @@ public class Level {
     /** Una letra de entidad del mapa y su baldosa (col, fila). */
     public record Spawn(char letter, int col, int row) {}
 
+    /** Mensaje del tutorial: se muestra mientras el jugador está desde esa columna hasta el siguiente mensaje. */
+    public record Hint(int col, String text) {}
+
     private final String name;
     private final char[][] tiles; // [fila][col]: '#', '=' o '.'
     private final int cols, rows;
     private final List<Spawn> spawns;
     private final List<Rectangle2D> jetpackZones;
+    private final List<Hint> hints;
 
-    Level(String name, char[][] tiles, List<Spawn> spawns, List<Rectangle2D> jetpackZones) {
+    Level(String name, char[][] tiles, List<Spawn> spawns, List<Rectangle2D> jetpackZones, List<Hint> hints) {
         this.name = name;
         this.tiles = tiles;
         this.rows = tiles.length;
         this.cols = rows == 0 ? 0 : tiles[0].length;
         this.spawns = spawns;
         this.jetpackZones = jetpackZones;
+        this.hints = hints;
     }
 
     public String getName() { return name; }
@@ -43,6 +48,15 @@ public class Level {
 
     /** Zonas 'J' (una caja por tramo horizontal de letras J), en píxeles del mundo. */
     public List<Rectangle2D> getJetpackZones() { return Collections.unmodifiableList(jetpackZones); }
+
+    /** El mensaje del tutorial que toca en la posición x (píxeles), o null si no hay. */
+    public String hintAt(double x) {
+        String text = null;
+        for (Hint h : hints) {                   // vienen ordenados por columna
+            if (h.col() * Config.TILE <= x) text = h.text();
+        }
+        return text;
+    }
 
     public char tileAt(int col, int row) {
         if (col < 0 || col >= cols) return '#';        // paredes laterales

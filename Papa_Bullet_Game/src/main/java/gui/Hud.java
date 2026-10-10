@@ -1,12 +1,16 @@
 package gui;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
+import model.Config;
 import model.GameWorld;
 import model.Overlay;
 import model.Player;
+import model.Sprites;
 import model.Weapon;
 
 import java.util.List;
@@ -20,6 +24,7 @@ public class Hud implements Overlay {
     private static final Font BIG = Font.font("Monospaced", FontWeight.BOLD, 20);
     private static final Font SMALL = Font.font("Monospaced", FontWeight.BOLD, 11);
     private static final Color GOLD = Color.web("#ffd24a");
+    private static final double HINT_SIZE = 15;
 
     @Override
     public void render(GraphicsContext gc, GameWorld world) {
@@ -54,9 +59,12 @@ public class Hud implements Overlay {
             gc.fillRect(cx, sy, 28, 28);
             gc.setFill(w == null ? Color.web("#2b2b38") : w == current ? GOLD : Color.web("#8a7a3a"));
             gc.fillRect(cx + 2, sy + 2, 24, 24);
-            gc.setFill(w == null ? Color.web("#1a1a22") : Color.web("#7a1d12"));
-            gc.fillRect(cx + 5, sy + 5, 18, 18);
-            if (w != null) {
+            gc.setFill(w == null ? Color.web("#1a1a22") : Color.web("#3a1a0c"));
+            gc.fillRect(cx + 4, sy + 4, 20, 20);
+            Image icon = w == null ? null : Sprites.get(w.getIcon(), 20, 20);
+            if (icon != null) {
+                gc.drawImage(icon, cx + 14 - icon.getWidth() / 2, sy + 14 - icon.getHeight() / 2);
+            } else if (w != null) {
                 gc.setFont(BIG);
                 gc.setFill(Color.WHITE);
                 gc.fillText(w.getName().substring(0, 1).toUpperCase(), cx + 8, sy + 21);
@@ -66,6 +74,25 @@ public class Hud implements Overlay {
             gc.setFont(SMALL);
             shadowText(gc, current.getName().toUpperCase(), x + SLOTS * 34 + 4, sy + 18, GOLD);
         }
+
+        String hint = world.getLevel().hintAt(p.getCenterX());
+        if (hint != null) drawHint(gc, hint);
+    }
+
+    /** Cartel del tutorial arriba al centro: panel azul noche con borde dorado (igual que los menús). */
+    private static void drawHint(GraphicsContext gc, String text) {
+        double w = text.length() * HINT_SIZE * 0.6 + 32, h = 30;   // Monospaced: cada letra mide ~0.6 del tamaño
+        double bx = (Config.WIDTH - w) / 2, by = 92;   // debajo de las dos filas del HUD
+        gc.setFill(Color.web("#080e28", 0.88));
+        gc.fillRect(bx, by, w, h);
+        gc.setStroke(GOLD);
+        gc.setLineWidth(2);
+        gc.strokeRect(bx, by, w, h);
+        gc.setFont(Font.font("Monospaced", FontWeight.BOLD, HINT_SIZE));
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setFill(Color.web("#ffe14a"));
+        gc.fillText(text, Config.WIDTH / 2.0, by + 20);
+        gc.setTextAlign(TextAlignment.LEFT);
     }
 
     private static void shadowText(GraphicsContext gc, String text, double x, double y, Color color) {
