@@ -5,45 +5,66 @@ import javafx.scene.paint.Color;
 
 /**
  * Fondo con parallax estilo Contra 4, dibujado con figuras (no necesita imágenes):
- * cielo en franjas, los Farallones a lo lejos, Cali en ruinas y la selva con palmas.
+ * cielo en franjas, montañas a lo lejos, ciudad en ruinas y una capa cercana.
+ * Los colores y la capa cercana (selva, desierto, ciudad, tierra quemada) salen del {@link Theme} del nivel.
  * Cada capa se mueve más lento que la cámara (factor < 1): eso da la sensación de profundidad.
  * Todo es determinista (rnd con semilla fija), así el fondo no "tiembla" entre frames.
  */
 public final class Background {
     private Background() {}
 
-    private static final Color[] SKY = {
-            Color.web("#0b1640"), Color.web("#13235a"), Color.web("#1b3374"), Color.web("#24478f"),
-            Color.web("#2f5ea9"), Color.web("#3e77c2"), Color.web("#5291d6"), Color.web("#6daae3"), Color.web("#8cc2ec")};
     private static final int BAND = 40;
 
+    /** Fondo del nivel 0 (lo usan los menús). */
     public static void render(GraphicsContext gc, Camera cam) {
+        render(gc, cam, Theme.ALL[0]);
+    }
+
+    public static void render(GraphicsContext gc, Camera cam, Theme t) {
         double cx = cam.getX(), cy = cam.getY();
-        sky(gc, cx);
-        mountains(gc, cx * 0.12, 330 - cy * 0.05);
-        ruins(gc, cx * 0.35, 470 - cy * 0.15);
-        jungle(gc, cx * 0.6, 540 - cy * 0.3);
+        sky(gc, cx, t);
+        mountains(gc, cx * 0.12, 330 - cy * 0.05, t);
+        ruins(gc, cx * 0.35, 470 - cy * 0.15, t);
+        double off = cx * 0.6, base = 540 - cy * 0.3;
+        switch (t.near()) {
+            case Theme.DESERT -> desert(gc, off, base, t);
+            case Theme.NIGHT_CITY -> nightCity(gc, off, base, t);
+            case Theme.BURNT -> burnt(gc, off, base, t);
+            default -> jungle(gc, off, base, t);
+        }
+        gc.setFill(t.nearDark());                   // relleno debajo de la capa cercana
+        gc.fillRect(0, base, Config.WIDTH, Config.HEIGHT - base);
     }
 
     // ---------------- capas ----------------
 
-    private static void sky(GraphicsContext gc, double cx) {
+    private static void sky(GraphicsContext gc, double cx, Theme t) {
+        Color[] bands = t.sky();
         int w = Config.WIDTH;
-        for (int i = 0; i < SKY.length; i++) {
-            gc.setFill(SKY[i]);
+        for (int i = 0; i < bands.length; i++) {
+            gc.setFill(bands[i]);
             gc.fillRect(0, i * BAND, w, BAND);
-            if (i + 1 < SKY.length) {                 // tramado de 4 px entre franjas: look de 16 bits
-                gc.setFill(SKY[i + 1]);
+            if (i + 1 < bands.length) {                 // tramado de 4 px entre franjas: look de 16 bits
+                gc.setFill(bands[i + 1]);
                 for (int x = 0; x < w; x += 8) {
                     gc.fillRect(x, (i + 1) * BAND - 4, 4, 2);
                     gc.fillRect(x + 4, (i + 1) * BAND - 2, 4, 2);
                 }
             }
         }
-        gc.setFill(SKY[SKY.length - 1]);
-        gc.fillRect(0, SKY.length * BAND, w, Config.HEIGHT - SKY.length * BAND);
+        gc.setFill(bands[bands.length - 1]);
+        gc.fillRect(0, bands.length * BAND, w, Config.HEIGHT - bands.length * BAND);
 
-        gc.setFill(Color.web("#dfe9ff"));             // estrellas casi quietas
+        if (t.orb() != null) {                         // sol o luna: casi quieto, detrás de las montañas
+            double ox = 560 - cx * 0.02, r = t.orbR();
+            gc.setFill(t.orb().deriveColor(0, 1, 1, 0.25));
+            gc.fillOval(ox - r * 1.5, t.orbY() - r * 1.5, r * 3, r * 3);
+            gc.setFill(t.orb());
+            gc.fillOval(ox - r, t.orbY() - r, r * 2, r * 2);
+        }
+
+        if (t.stars() == null) return;
+        gc.setFill(t.stars());                         // estrellas (o brasas) casi quietas
         double off = cx * 0.03;
         for (int i = 0; i < 40; i++) {
             double x = mod(rnd(i, 1) * 1600 - off, 1600);
@@ -52,7 +73,7 @@ public final class Background {
     }
 
     /** Los Farallones: picos con cara iluminada a la izquierda, sombra a la derecha y nieve arriba. */
-    private static void mountains(GraphicsContext gc, double off, double base) {
+    private static void mountains(GraphicsContext gc, double off, double base, Theme t) {
         final int period = 1200;
         for (int k = (int) Math.floor(off / period); k * period - off < Config.WIDTH; k++) {
             double ox = k * period - off;
@@ -60,25 +81,25 @@ public final class Background {
                 double px = ox + i * period / 9.0 + rnd(i, 3) * 60;
                 double h = 110 + rnd(i, 4) * 130, half = h * (0.9 + rnd(i, 5) * 0.5);
                 double top = base - h;
-                gc.setFill(Color.web("#7f9fc6"));
+                gc.setFill(t.farLit());
                 gc.fillPolygon(new double[]{px - half, px, px}, new double[]{base, top, base}, 3);
-                gc.setFill(Color.web("#557aa6"));
+                gc.setFill(t.farShade());
                 gc.fillPolygon(new double[]{px, px, px + half}, new double[]{top, base, base}, 3);
-                double s = 0.22;                       // nieve: la punta del pico
-                gc.setFill(Color.web("#e6eef8"));
+                double s = 0.22;                       // la punta del pico (nieve, lava...)
+                gc.setFill(t.peakLit());
                 gc.fillPolygon(new double[]{px - half * s, px, px}, new double[]{top + h * s, top, top + h * s * 1.25}, 3);
-                gc.setFill(Color.web("#b9c9dd"));
+                gc.setFill(t.peakShade());
                 gc.fillPolygon(new double[]{px, px, px + half * s}, new double[]{top, top + h * s * 1.25, top + h * s}, 3);
             }
         }
-        gc.setFill(Color.web("#557aa6"));
+        gc.setFill(t.farShade());
         gc.fillRect(0, base, Config.WIDTH, Config.HEIGHT - base);
     }
 
     /** Cali después del terremoto: edificios con el techo roto, algunas ventanas encendidas. */
-    private static void ruins(GraphicsContext gc, double off, double base) {
+    private static void ruins(GraphicsContext gc, double off, double base, Theme t) {
         final int period = 960;
-        Color wall = Color.web("#2c3e63"), dark = Color.web("#223152"), lit = Color.web("#d9b25a");
+        Color wall = t.wall(), dark = t.wallDark(), lit = t.window();
         for (int k = (int) Math.floor(off / period); k * period - off < Config.WIDTH; k++) {
             double x = k * period - off;
             for (int i = 0; x < (k + 1) * period - off - 40; i++) {
@@ -93,7 +114,7 @@ public final class Background {
                     for (double wx = x + 8; wx < x + w - 12; wx += 14) {
                         double r = rnd((int) (wx * 7 + wy), 9);
                         if (r < 0.55) continue;           // ventanas sin vidrio / apagadas
-                        gc.setFill(r > 0.93 ? lit : dark);
+                        gc.setFill(r > 1 - t.litWindows() ? lit : dark);
                         gc.fillRect(Math.round(wx), Math.round(wy), 6, 8);
                     }
                 }
@@ -104,22 +125,103 @@ public final class Background {
         gc.fillRect(0, base, Config.WIDTH, Config.HEIGHT - base);
     }
 
-    /** Selva y palmas, la capa más cercana. */
-    private static void jungle(GraphicsContext gc, double off, double base) {
+    // ---------------- capa cercana (una por tipo de nivel) ----------------
+
+    /** Selva y palmas. */
+    private static void jungle(GraphicsContext gc, double off, double base, Theme t) {
         final int period = 800;
         for (int k = (int) Math.floor(off / period); k * period - off < Config.WIDTH + 100; k++) {
             double ox = k * period - off;
             for (int i = 0; i < 4; i++) palm(gc, ox + 60 + i * 200 + rnd(i, 11) * 80, base - 10, 120 + rnd(i, 12) * 60);
             for (int i = 0; i < 26; i++) {
                 double x = ox + i * 32 + rnd(i, 13) * 10, r = 26 + rnd(i, 14) * 22;
-                gc.setFill(Color.web("#1d5b33"));
+                gc.setFill(t.nearDark());
                 gc.fillOval(x - r, base - r * 0.9, r * 2, r * 2);
-                gc.setFill(Color.web("#2b7a41"));
+                gc.setFill(t.nearLit());
                 gc.fillOval(x - r * 0.6, base - r * 0.85, r * 1.1, r * 0.7);
             }
         }
-        gc.setFill(Color.web("#1d5b33"));
-        gc.fillRect(0, base, Config.WIDTH, Config.HEIGHT - base);
+    }
+
+    /** Dunas bajas y cactus. */
+    private static void desert(GraphicsContext gc, double off, double base, Theme t) {
+        final int period = 800;
+        Color cactus = Color.web("#4f7a3a"), cactusLit = Color.web("#78a050");
+        for (int k = (int) Math.floor(off / period); k * period - off < Config.WIDTH + 100; k++) {
+            double ox = k * period - off;
+            for (int i = 0; i < 7; i++) {                  // dunas
+                double x = ox + i * 120 + rnd(i, 20) * 40, r = 70 + rnd(i, 21) * 50;
+                gc.setFill(t.nearDark());
+                gc.fillOval(x - r, base - r * 0.35, r * 2, r * 0.9);
+                gc.setFill(t.nearLit());
+                gc.fillOval(x - r * 0.7, base - r * 0.33, r * 1.1, r * 0.25);
+            }
+            for (int i = 0; i < 3; i++) {                  // cactus: tronco y dos brazos
+                double x = ox + 80 + i * 260 + rnd(i, 22) * 90, h = 60 + rnd(i, 23) * 50, top = base - 10 - h;
+                gc.setFill(cactus);
+                gc.fillRoundRect(x, top, 14, h + 10, 12, 12);
+                gc.fillRoundRect(x - 14, top + h * 0.35, 14, 8, 6, 6);
+                gc.fillRoundRect(x - 14, top + h * 0.12, 8, h * 0.3, 6, 6);
+                gc.fillRoundRect(x + 14, top + h * 0.5, 12, 8, 6, 6);
+                gc.fillRoundRect(x + 18, top + h * 0.28, 8, h * 0.3, 6, 6);
+                gc.setFill(cactusLit);
+                gc.fillRect(x + 3, top + 4, 3, h);
+            }
+        }
+    }
+
+    /** Edificios cercanos de noche y postes de luz. */
+    private static void nightCity(GraphicsContext gc, double off, double base, Theme t) {
+        final int period = 800;
+        for (int k = (int) Math.floor(off / period); k * period - off < Config.WIDTH + 100; k++) {
+            double x = k * period - off;
+            for (int i = 0; i < 8; i++) {                  // siluetas con algunas ventanas amarillas
+                double w = 70 + rnd(i, 30) * 40, h = 60 + rnd(i, 31) * 90, top = base - h;
+                gc.setFill(t.nearDark());
+                gc.fillRect(Math.round(x), Math.round(top), w, h + 1);
+                gc.setFill(t.nearLit());
+                for (double wy = top + 10; wy < base - 14; wy += 18) {
+                    for (double wx = x + 8; wx < x + w - 12; wx += 16) {
+                        if (rnd((int) (wx * 3 + wy), 32) > 0.8) gc.fillRect(Math.round(wx), Math.round(wy), 6, 8);
+                    }
+                }
+                x += w + 4;
+            }
+            for (int i = 0; i < 4; i++) {                  // postes: brillo y bombillo
+                double px = k * period - off + 100 + i * 200, top = base - 110;
+                gc.setFill(t.nearLit().deriveColor(0, 1, 1, 0.3));
+                gc.fillOval(px - 6, top - 8, 36, 24);
+                gc.setFill(Color.web("#2a2840"));
+                gc.fillRect(px - 2, top, 4, 110);
+                gc.fillRect(px - 2, top, 14, 4);
+                gc.setFill(t.nearLit());
+                gc.fillRect(px + 8, top + 4, 8, 5);
+            }
+        }
+    }
+
+    /** Lomas de roca y árboles quemados. */
+    private static void burnt(GraphicsContext gc, double off, double base, Theme t) {
+        final int period = 800;
+        for (int k = (int) Math.floor(off / period); k * period - off < Config.WIDTH + 100; k++) {
+            double ox = k * period - off;
+            gc.setStroke(t.nearLit());
+            for (int i = 0; i < 4; i++) {                  // tronco y ramas secas
+                double x = ox + 60 + i * 200 + rnd(i, 40) * 80, h = 90 + rnd(i, 41) * 60, top = base - h;
+                gc.setLineWidth(7);
+                gc.strokeLine(x, base, x + 4, top);
+                gc.setLineWidth(3);
+                for (int b = 0; b < 4; b++) {
+                    double by = top + h * (0.1 + b * 0.18), dir = b % 2 == 0 ? -1 : 1, len = 22 + rnd(i * 4 + b, 42) * 22;
+                    gc.strokeLine(x + 3, by, x + 3 + dir * len, by - len * 0.6);
+                }
+            }
+            for (int i = 0; i < 14; i++) {                 // lomas
+                double x = ox + i * 60 + rnd(i, 43) * 20, r = 30 + rnd(i, 44) * 30;
+                gc.setFill(t.nearDark());
+                gc.fillOval(x - r, base - r * 0.6, r * 2, r * 1.4);
+            }
+        }
     }
 
     private static void palm(GraphicsContext gc, double x, double base, double h) {
