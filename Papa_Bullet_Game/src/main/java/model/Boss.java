@@ -1,5 +1,6 @@
 package model;
 
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -7,8 +8,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * 'B' — el jefe de cada nivel. Todos hacen lo mismo con distintos números:
@@ -22,9 +25,11 @@ import java.util.List;
  */
 public class Boss extends Enemy {
 
+
     /** Los números de cada jefe. */
     private record Spec(String name, String sprite, double w, double h, int hp, int shots, double spreadDeg,
                         double speed, double gravity, double size, int damage, String bulletSprite) {}
+
 
     private static final Spec[] SPECS = {
             new Spec("ROBOT", null, 90, 120, 600, 3, 30, 300, 0, 10, 25, null),
@@ -34,14 +39,18 @@ public class Boss extends Enemy {
     };
     private static final double PATROL = 120, ATTACK_RATE = 1.8;
 
+
     private final Spec cfg;
     private final Image[] frames;
     private double homeX = Double.NaN, time;
+    private int patrolDir = -1;
     private boolean seen;
+
 
     public Boss(int levelIndex) {
         this(SPECS[Math.floorMod(levelIndex, SPECS.length)]);
     }
+
 
     private Boss(Spec cfg) {
         super(cfg.w(), cfg.h(), cfg.hp(), 50, false);
@@ -50,7 +59,9 @@ public class Boss extends Enemy {
         cooldown = 1.2;
     }
 
+
     boolean isAngry() { return hp < maxHp / 2; }
+
 
     @Override
     protected void act(double dt, GameWorld world, Entity player) {
@@ -58,14 +69,17 @@ public class Boss extends Enemy {
         seen = true;
         time += dt;
         double speed = isAngry() ? 110 : 60;
-        if (x < homeX - PATROL) vx = speed;           // va y viene entre homeX ± PATROL
-        else if (x > homeX + PATROL) vx = -speed;
-        else if (vx == 0) vx = -speed;
+        if (x < homeX - PATROL) patrolDir = 1;        // va y viene entre homeX ± PATROL
+        else if (x > homeX + PATROL) patrolDir = -1;
+        // antes, si un muro o un borde lo frenaba se quedaba pegado ahí: ahora da la vuelta
+        if (hitWall || (onGround && ledgeAhead(world.getLevel(), patrolDir))) patrolDir = -patrolDir;
+        vx = patrolDir * speed;
         if (cooldown == 0) {
             attack(world, player);
             cooldown = isAngry() ? ATTACK_RATE * 0.6 : ATTACK_RATE;
         }
     }
+
 
     /** Dispara cfg.shots balas en abanico hacia el jugador (con gravedad, en parábola por encima). */
     private void attack(GameWorld world, Entity player) {
@@ -80,13 +94,16 @@ public class Boss extends Enemy {
         }
     }
 
+
     @Override
     public void onDeath(GameWorld world) {
         world.spawn(new Explosion(getCenterX(), getCenterY(), Math.max(width, height), 0));
         world.bossDefeated();
     }
 
+
     // ---------------- dibujo ----------------
+
 
     @Override
     public void render(GraphicsContext gc, Camera cam) {
@@ -102,6 +119,7 @@ public class Boss extends Enemy {
         }
         if (seen) drawHealthBar(gc);
     }
+
 
     /** Barra grande abajo de la pantalla, como en Contra. Se dibuja en coordenadas de pantalla. */
     private void drawHealthBar(GraphicsContext gc) {
@@ -121,6 +139,7 @@ public class Boss extends Enemy {
         gc.setTextAlign(TextAlignment.LEFT);
     }
 
+
     /** El robot del nivel 0 (no tiene sprite). */
     private void drawRobot(GraphicsContext gc, Camera cam) {
         boolean blink = (int) (time * 3) % 2 == 0;
@@ -139,6 +158,7 @@ public class Boss extends Enemy {
         part(gc, cam, 43, 0, 4, 8, Color.web("#5c6573"));      // antena
     }
 
+
     private static Image[] loadFrames(String prefix, double w, double h) {
         List<Image> list = new ArrayList<>();
         if (prefix == null) return new Image[0];
@@ -149,3 +169,5 @@ public class Boss extends Enemy {
         return list.toArray(new Image[0]);
     }
 }
+
+

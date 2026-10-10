@@ -1,5 +1,6 @@
 package control;
 
+
 import gui.App;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -9,13 +10,16 @@ import javafx.scene.image.Image;
 import model.Background;
 import model.Camera;
 import model.Config;
+import model.KingPapa;
 import model.Level;
 import model.LevelLoader;
 import model.Player;
 import model.Sprites;
 
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Menú principal. El fondo es el mismo paisaje del juego (Background + baldosas de Level),
@@ -23,19 +27,23 @@ import java.util.List;
  */
 public class MainMenuController {
 
+
     @FXML private Canvas background;
+
 
     @FXML
     private void initialize() {
         paintScenery(background.getGraphicsContext2D(), true);
     }
 
-    /** Paisaje de los menús: fondo, piso con un acantilado a cada lado y (opcional) el científico y la freidora. */
+
+    /** Paisaje de los menús: fondo, piso con un acantilado a cada lado y (opcional) el científico y el carrito de cholado. */
     static void paintScenery(GraphicsContext gc, boolean withCharacters) {
         Camera cam = new Camera();
         Background.render(gc, cam);
         LevelLoader.parse("MENU", groundRows()).render(gc, cam);
         if (!withCharacters) return;
+
 
         double cliffTop = 12 * Config.TILE;
         Image pj = Sprites.get(Player.selectedSkin + "_1.png", 160, 80);
@@ -44,9 +52,9 @@ public class MainMenuController {
             gc.drawImage(pj, 34, cliffTop - pj.getHeight() * 0.92);
             gc.setEffect(null);
         }
-        Image fryer = Sprites.get("Freidora.png", 56, 64);
-        if (fryer != null) gc.drawImage(fryer, Config.WIDTH - 90, cliffTop - fryer.getHeight());
+        KingPapa.drawCart(gc, Config.WIDTH - 62, cliffTop, false, 0);
     }
+
 
     private static List<String> groundRows() {
         List<String> rows = new ArrayList<>();
@@ -57,11 +65,15 @@ public class MainMenuController {
         return rows;
     }
 
+
     @FXML private void onStartClicked() {
         App.showGame();
     }
+
 
     @FXML private void onSkinsClicked() {
         App.showSkins();
     }
 }
+
+

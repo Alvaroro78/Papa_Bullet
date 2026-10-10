@@ -1,13 +1,16 @@
 package model;
 
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
-/** La papa explosiva: cae en parábola y explota al tocar una baldosa o un enemigo. */
+
+/** La papa explosiva: cae en parábola, atraviesa las plataformas '=' y explota al tocar '#', '-' o un enemigo. */
 public class PapaBomba extends Entity {
     private static final double SIZE = 18, LIFETIME = 3;
     private double age, spin;
+
 
     public PapaBomba(double cx, double cy, double vx, double vy) {
         width = height = SIZE;
@@ -17,8 +20,10 @@ public class PapaBomba extends Entity {
         this.vy = vy;
         team = Team.PLAYER;
         collidesWithTiles = true;
+        projectile = true;
         gravityScale = 1;
     }
+
 
     @Override
     public void update(double dt, GameWorld world) {
@@ -28,15 +33,18 @@ public class PapaBomba extends Entity {
         else if (age > LIFETIME) kill();
     }
 
+
     @Override
     public void onCollide(Entity other, GameWorld world) {
-        if (other.getTeam() == Team.ENEMY) explode(world);
+        if (other.getTeam() == Team.ENEMY && !other.isProjectile()) explode(world); // las balas enemigas no la detonan
     }
+
 
     private void explode(GameWorld world) {
         world.spawn(new Explosion(getCenterX(), getCenterY(), 48, 40));
         kill();
     }
+
 
     @Override
     public void render(GraphicsContext gc, Camera cam) {
@@ -53,3 +61,5 @@ public class PapaBomba extends Entity {
         gc.restore();
     }
 }
+
+

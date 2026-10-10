@@ -1,7 +1,9 @@
 package model;
 
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+
 
 /** Explosión dibujada con círculos: hace daño UNA vez a los enemigos dentro del radio y se desvanece. */
 public class Explosion extends Entity {
@@ -10,6 +12,7 @@ public class Explosion extends Entity {
     private final int damage;
     private double age;
     private boolean done;
+
 
     public Explosion(double cx, double cy, double radius, int damage) {
         this.radius = radius;
@@ -20,11 +23,13 @@ public class Explosion extends Entity {
         team = Team.NEUTRAL;
     }
 
+
     @Override
     public void update(double dt, GameWorld world) {
         if (!done) {
             done = true;
             for (Entity e : world.getEnemies()) {
+                if (e.isProjectile()) continue;     // no "daña" balas enemigas
                 if (Math.hypot(e.getCenterX() - getCenterX(), e.getCenterY() - getCenterY()) <= radius + e.getWidth() / 2) {
                     e.takeDamage(damage, this);
                 }
@@ -33,6 +38,7 @@ public class Explosion extends Entity {
         age += dt;
         if (age >= DURATION) kill();
     }
+
 
     @Override
     public void render(GraphicsContext gc, Camera cam) {
@@ -48,3 +54,5 @@ public class Explosion extends Entity {
         gc.setGlobalAlpha(1);
     }
 }
+
+

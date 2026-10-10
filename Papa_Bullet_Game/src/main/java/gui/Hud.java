@@ -1,5 +1,6 @@
 package gui;
 
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -13,11 +14,14 @@ import model.Player;
 import model.Sprites;
 import model.Weapon;
 
+
 import java.util.List;
 
+
 /**
- * HUD estilo Contra (P5 lo puede retocar): "1P", barra de vida por segmentos y los espacios
- * de las 3 armas. El arma que se está usando tiene el marco dorado.
+ * HUD estilo Contra (P5 lo puede retocar): "1P", la barra de vida/tiempo por segmentos con el
+ * contador en minutos:segundos, el medidor de calor de la máquina y los espacios de las 3 armas.
+ * El arma que se está usando tiene el marco dorado.
  */
 public class Hud implements Overlay {
     private static final int SLOTS = 3, SEGMENTS = 15;
@@ -26,17 +30,20 @@ public class Hud implements Overlay {
     private static final Color GOLD = Color.web("#ffd24a");
     private static final double HINT_SIZE = 15;
 
+
     @Override
     public void render(GraphicsContext gc, GameWorld world) {
         if (!(world.getPlayer() instanceof Player p)) return;
         double x = 16, y = 16;
 
+
         gc.setFont(BIG);
         shadowText(gc, "1P", x, y + 18, Color.WHITE);
 
-        // fila 1: vida en 15 segmentos (verde -> amarillo -> rojo) y el número
+
+        // fila 1: vida = tiempo, en 15 segmentos (verde -> amarillo -> rojo) y el contador m:ss
         double bx = x + 40, bw = 150, bh = 14;
-        double ratio = Math.max(0, p.getHp()) / (double) Player.MAX_HP;
+        double ratio = Math.max(0, p.getTimeLeft()) / Player.MAX_HP;
         gc.setFill(Color.BLACK);
         gc.fillRect(bx - 2, y + 4, bw + 4, bh + 4);
         gc.setFill(Color.web("#3a0d0d"));
@@ -45,13 +52,31 @@ public class Hud implements Overlay {
         int filled = (int) Math.ceil(ratio * SEGMENTS);
         double seg = bw / SEGMENTS;
         for (int i = 0; i < filled; i++) gc.fillRect(bx + i * seg + 1, y + 6, seg - 2, bh);
+        int secs = (int) Math.ceil(Math.max(0, p.getTimeLeft()));
+        gc.setFont(BIG);
+        shadowText(gc, String.format("%d:%02d", secs / 60, secs % 60), bx + bw + 10, y + 20,
+                ratio > 0.25 ? Color.WHITE : Color.web("#ff6a5a"));
+
+
+        // medidor de calor debajo de la barra: amarillo -> naranja -> rojo; titila y avisa cerca del máximo
+        double heat = p.getHeat(), hy = y + 24, hh = 6;
+        gc.setFill(Color.BLACK);
+        gc.fillRect(bx - 2, hy - 2, bw + 4, hh + 4);
+        gc.setFill(Color.web("#2a1608"));
+        gc.fillRect(bx, hy, bw, hh);
+        boolean blink = heat > 0.85 && (System.nanoTime() / 120_000_000L) % 2 == 0;
+        gc.setFill(blink ? Color.WHITE : heat > 0.66 ? Color.web("#ff3a1a") : heat > 0.33 ? Color.web("#ff8a1a") : Color.web("#ffd24a"));
+        gc.fillRect(bx, hy, bw * heat, hh);
         gc.setFont(SMALL);
-        shadowText(gc, String.valueOf(Math.max(0, p.getHp())), bx + bw + 8, y + 18, Color.WHITE);
+        String heatText = heat > 0.85 ? "¡SOBRECALENTADA! x" : "CALOR x";
+        shadowText(gc, heatText + String.format("%.1f", p.drainRate()), bx + bw + 10, hy + 8,
+                heat > 0.66 ? Color.web("#ff6a3a") : Color.web("#ffcf8a"));
+
 
         // fila 2: las 3 armas; vacío = gris, recogida = inicial, actual = marco dorado
         List<Weapon> weapons = p.getWeapons();
         Weapon current = p.getCurrentWeapon();
-        double sy = y + 30;
+        double sy = y + 38;
         for (int i = 0; i < SLOTS; i++) {
             double cx = x + i * 34;
             Weapon w = i < weapons.size() ? weapons.get(i) : null;
@@ -75,9 +100,11 @@ public class Hud implements Overlay {
             shadowText(gc, current.getName().toUpperCase(), x + SLOTS * 34 + 4, sy + 18, GOLD);
         }
 
+
         String hint = world.getLevel().hintAt(p.getCenterX());
         if (hint != null) drawHint(gc, hint);
     }
+
 
     /** Cartel del tutorial arriba al centro: panel azul noche con borde dorado (igual que los menús). */
     private static void drawHint(GraphicsContext gc, String text) {
@@ -95,6 +122,7 @@ public class Hud implements Overlay {
         gc.setTextAlign(TextAlignment.LEFT);
     }
 
+
     private static void shadowText(GraphicsContext gc, String text, double x, double y, Color color) {
         gc.setFill(Color.BLACK);
         gc.fillText(text, x + 2, y + 2);
@@ -102,3 +130,5 @@ public class Hud implements Overlay {
         gc.fillText(text, x, y);
     }
 }
+
+

@@ -1,8 +1,10 @@
 package model;
 
+
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+
 
 /**
  * CONTRATO 1 — todo lo que se mueve o se dibuja (jugador, enemigos, balas, aceite) hereda de aquí.
@@ -24,30 +26,44 @@ public abstract class Entity {
     protected int hp = 1;
     protected boolean alive = true;
 
+
     // ===== extras de P1 =====
     protected Team team = Team.NEUTRAL;
-    /** Si es true el motor la frena contra '#' y '=' (las balas que "explotan al tocar algo" la necesitan). */
+    /** Si es true el motor la frena contra '#' y '=' (si además es projectile, ignora '=' y choca con '-'). */
     protected boolean collidesWithTiles = false;
     /** 0 = no cae (helicóptero, bala recta). 1 = gravedad normal. 0.5 = flota más, etc. */
     protected double gravityScale = 0;
+    /**
+     * true = es una BALA (del jugador o enemiga). Las balas:
+     *  - atraviesan las plataformas '=' por arriba, por abajo y de lado (solo las frena '#'),
+     *  - se rompen contra las plataformas blindadas '-' (así el diseñador del nivel decide dónde cubren),
+     *  - no chocan con las balas del otro bando (una papa no explota contra una bala de policía).
+     */
+    protected boolean projectile = false;
     /** Resultado del último paso de física. */
     protected boolean onGround, hitWall, hitCeiling;
+
 
     private double dropTimer;
     private boolean deathNotified;
 
+
     public abstract void update(double dt, GameWorld world);
 
+
     public abstract void render(GraphicsContext gc, Camera cam);
+
 
     public Rectangle2D getBounds() {
         return new Rectangle2D(x, y, width, height);
     }
 
+
     public void takeDamage(int dmg) {
         hp -= dmg;
         if (hp <= 0) alive = false;
     }
+
 
     /** Daño sabiendo quién lo causó (bala, explosión, aceite). Por defecto es igual al de arriba;
      *  el policía con escudo lo sobrescribe para bloquear lo que le llega de frente. */
@@ -55,15 +71,20 @@ public abstract class Entity {
         takeDamage(dmg);
     }
 
+
     // ===== hooks opcionales (sobrescribir si hace falta) =====
+
 
     /** Se llama cuando esta entidad se solapa con {@code other} (solo si ambas siguen vivas). */
     public void onCollide(Entity other, GameWorld world) {}
 
+
     /** Se llama una sola vez cuando alive pasa a false (aquí el jefe avisa: world.bossDefeated()). */
     public void onDeath(GameWorld world) {}
 
+
     // ===== utilidades =====
+
 
     /** Mata sin importar hp (caer al vacío, etc.). */
     public void kill() {
@@ -71,11 +92,13 @@ public abstract class Entity {
         alive = false;
     }
 
+
     /** Baja de una plataforma '=': durante 0.25 s la entidad ignora las plataformas. */
     public void dropThroughPlatform() {
         dropTimer = 0.25;
         if (vy < 120) vy = 120;
     }
+
 
     /** Dibuja la caja de la entidad con un color (para probar sin sprites). */
     protected void drawBox(GraphicsContext gc, Camera cam, Color color) {
@@ -83,7 +106,9 @@ public abstract class Entity {
         gc.fillRect(Math.round(cam.toScreenX(x)), Math.round(cam.toScreenY(y)), width, height);
     }
 
+
     // ===== acceso para el motor y otros módulos =====
+
 
     public double getX() { return x; }
     public double getY() { return y; }
@@ -97,16 +122,20 @@ public abstract class Entity {
     public boolean isAlive() { return alive; }
     public Team getTeam() { return team; }
     public boolean collidesWithTiles() { return collidesWithTiles; }
+    public boolean isProjectile() { return projectile; }
     public double getGravityScale() { return gravityScale; }
     public boolean isOnGround() { return onGround; }
     public boolean isHitWall() { return hitWall; }
     public boolean isHitCeiling() { return hitCeiling; }
     public boolean isDroppingThrough() { return dropTimer > 0; }
 
+
     public void setPosition(double x, double y) { this.x = x; this.y = y; }
     public void setVelocity(double vx, double vy) { this.vx = vx; this.vy = vy; }
 
+
     // --- solo para el motor ---
+
 
     public void setContacts(boolean ground, boolean wall, boolean ceiling) {
         this.onGround = ground;
@@ -114,9 +143,11 @@ public abstract class Entity {
         this.hitCeiling = ceiling;
     }
 
+
     public void tickTimers(double dt) {
         if (dropTimer > 0) dropTimer -= dt;
     }
+
 
     public void notifyDeath(GameWorld world) {
         if (!alive && !deathNotified) {
@@ -125,3 +156,5 @@ public abstract class Entity {
         }
     }
 }
+
+

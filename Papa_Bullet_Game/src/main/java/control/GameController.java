@@ -1,5 +1,6 @@
 package control;
 
+
 import gui.App;
 import gui.Hud;
 import model.Config;
@@ -8,6 +9,7 @@ import model.GameWorld;
 import model.InputHandler;
 import model.Overlay;
 import model.Entity;
+import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,10 +27,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Window;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Controlador de Game.fxml (P1): conecta el Canvas 800x600 con el GameLoop y el GameWorld,
@@ -38,15 +43,18 @@ import java.util.List;
  */
 public class GameController implements PauseHandler {
 
+
     @FXML private StackPane root;
     @FXML private Canvas canvas;
     @FXML private Text levelLabel;
     @FXML private Button pauseButton;
 
+
     private InputHandler input;
     private GameWorld world;
     private GameLoop loop;
     private GraphicsContext gc;
+
 
     private final List<Overlay> overlays = new ArrayList<>();
     private Scene scene;
@@ -56,7 +64,14 @@ public class GameController implements PauseHandler {
     private boolean leaving;
     private String shownLevelName = "";
 
+
     private final EventHandler<KeyEvent> devKeys = this::onDevKey;
+    // Al perder el foco se sueltan las teclas. Antes se agregaba un listener NUEVO a la ventana en cada
+    // partida y nunca se quitaba (se acumulaban); ahora hay uno solo y se quita al salir.
+    private final ChangeListener<Boolean> focusListener = (o, was, is) -> { if (!is) input.clear(); };
+    private final ChangeListener<Window> windowListener = (o, oldW, newW) -> watchWindow(newW);
+    private Window window;
+
 
     @FXML
     private void initialize() {
@@ -66,48 +81,66 @@ public class GameController implements PauseHandler {
         gc = canvas.getGraphicsContext2D();
         loop = new GameLoop(this::update, this::render);
 
+
         pauseButton.setFocusTraversable(false);   // que Espacio/Enter no activen el botón por accidente
         root.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) attachTo(newScene);
             else detach();
         });
 
+
         addOverlay(new Hud());
     }
+
 
     /** P5: registra capas que se dibujan encima del mundo (HUD). */
     public void addOverlay(Overlay overlay) {
         overlays.add(overlay);
     }
 
+
     public GameWorld getWorld() { return world; }
 
+
     // ===================== ciclo de vida =====================
+
 
     private void attachTo(Scene s) {
         scene = s;
         input.attach(s);
         s.addEventFilter(KeyEvent.KEY_PRESSED, devKeys);
-        s.windowProperty().addListener((o, oldW, newW) -> {
-            if (newW != null) newW.focusedProperty().addListener((fo, was, is) -> { if (!is) input.clear(); });
-        });
+        s.windowProperty().addListener(windowListener);
+        watchWindow(s.getWindow());
         loop.start();
     }
+
+
+    private void watchWindow(Window w) {
+        if (window != null) window.focusedProperty().removeListener(focusListener);
+        window = w;
+        if (w != null) w.focusedProperty().addListener(focusListener);
+    }
+
 
     private void detach() {
         loop.stop();
         if (scene != null) {
             input.detach(scene);
             scene.removeEventFilter(KeyEvent.KEY_PRESSED, devKeys);
+            scene.windowProperty().removeListener(windowListener);
+            watchWindow(null);
             scene = null;
         }
     }
 
+
     // ===================== frame =====================
+
 
     private void update(double dt) {
         world.update(dt);
         input.endFrame();
+
 
         String name = world.getLevel().getName();
         if (!name.equals(shownLevelName)) {
@@ -119,12 +152,14 @@ public class GameController implements PauseHandler {
         }
     }
 
+
     private void render() {
         world.render(gc);
         for (Overlay o : overlays) o.render(gc, world);
         drawStateBanner();
         if (debug) drawDebug();
     }
+
 
     private void drawStateBanner() {
         String msg = switch (world.getState()) {
@@ -143,6 +178,7 @@ public class GameController implements PauseHandler {
         gc.setTextAlign(TextAlignment.LEFT);
     }
 
+
     private void drawDebug() {
         var cam = world.getCamera();
         world.getLevel().renderDebug(gc, cam);
@@ -160,7 +196,9 @@ public class GameController implements PauseHandler {
                 cam.getX(), p.getX(), p.getY(), p.isOnGround(), world.getEntities().size(), world.getState()), 10, Config.HEIGHT - 10);
     }
 
+
     // ===================== teclas =====================
+
 
     private void onDevKey(KeyEvent e) {
         switch (e.getCode()) {
@@ -172,13 +210,16 @@ public class GameController implements PauseHandler {
         }
     }
 
+
     // ===================== pausa =====================
+
 
     /** Botón "II" de Game.fxml. */
     @FXML
     private void onPauseClicked() {
         pause();
     }
+
 
     private void pause() {
         if (paused || world.getState() == GameWorld.State.GAME_COMPLETE) return;
@@ -196,6 +237,7 @@ public class GameController implements PauseHandler {
         root.getChildren().add(pauseLayer);
     }
 
+
     @Override
     public void resume() {
         if (!paused) return;
@@ -206,11 +248,13 @@ public class GameController implements PauseHandler {
         loop.start();
     }
 
+
     @Override
     public void restart() {
         resume();
         world.restartLevel();
     }
+
 
     @Override
     public void exitToMenu() {
@@ -220,3 +264,5 @@ public class GameController implements PauseHandler {
         App.showMainMenu();
     }
 }
+
+

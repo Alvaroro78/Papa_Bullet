@@ -1,9 +1,16 @@
 package model;
 
+
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
+
 
 import java.io.InputStream;
 import structures.HashTable;
+
 
 /**
  * Carga y cachea sprites de {@code resources/assets/sprites/}.
@@ -13,9 +20,12 @@ import structures.HashTable;
  */
 public final class Sprites {
     private static final HashTable<String, Image> CACHE = new HashTable<>();
+    private static final HashTable<Image, Image> HEAT_MASKS = new HashTable<>();
     private static final String BASE = "/assets/sprites/";
 
+
     private Sprites() {}
+
 
     /** Escala para que quepa en w x h conservando proporción. */
     public static Image get(String file, double w, double h) {
@@ -31,4 +41,39 @@ public final class Sprites {
         CACHE.put(key, img);
         return img;
     }
+
+
+    /**
+     * Máscara de sobrecalentamiento: una copia del sprite donde SOLO la máquina (los píxeles morados de
+     * la mochila) queda pintada de rojo-naranja y el resto transparente. Player la dibuja encima del
+     * sprite con globalAlpha = calor. Se calcula una vez por imagen. null si la imagen no tiene morado.
+     */
+    public static Image heatMask(Image src) {
+        if (src == null) return null;
+        if (HEAT_MASKS.containsKey(src)) return HEAT_MASKS.get(src);
+        Image out = null;
+        PixelReader pr = src.getPixelReader();
+        if (pr != null) {
+            int w = (int) src.getWidth(), h = (int) src.getHeight();
+            WritableImage mask = new WritableImage(w, h);
+            PixelWriter pw = mask.getPixelWriter();
+            boolean any = false;
+            for (int j = 0; j < h; j++) {
+                for (int i = 0; i < w; i++) {
+                    Color c = pr.getColor(i, j);
+                    if (c.getOpacity() > 0.5 && c.getHue() >= 237 && c.getHue() <= 310
+                            && c.getSaturation() > 0.2 && c.getBrightness() > 0.3) {
+                        double b = c.getBrightness();             // conserva el sombreado del pixel art
+                        pw.setColor(i, j, Color.color(1, 0.15 + 0.35 * b, 0.05));
+                        any = true;
+                    }
+                }
+            }
+            if (any) out = mask;
+        }
+        HEAT_MASKS.put(src, out);
+        return out;
+    }
 }
+
+

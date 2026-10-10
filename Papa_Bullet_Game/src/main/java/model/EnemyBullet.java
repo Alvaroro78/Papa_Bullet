@@ -1,15 +1,21 @@
 package model;
 
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
-/** Bala de cualquier enemigo: recta o en curva (gravity), se rompe contra las baldosas y le quita vida al jugador. */
+
+/**
+ * Bala de cualquier enemigo: recta o en curva (gravity), le quita vida al jugador.
+ * Es projectile: atraviesa las plataformas '=' y solo se rompe contra '#' y '-'.
+ */
 public class EnemyBullet extends Entity {
     private static final double LIFETIME = 4;
     private final int damage;
     private final String sprite; // null = bolita roja
     private double age;
+
 
     public EnemyBullet(double cx, double cy, double vx, double vy, double gravity, double size, int damage, String sprite) {
         width = height = size;
@@ -21,14 +27,17 @@ public class EnemyBullet extends Entity {
         this.sprite = sprite;
         team = Team.ENEMY;
         collidesWithTiles = true;
+        projectile = true;
         gravityScale = gravity;
     }
+
 
     @Override
     public void update(double dt, GameWorld world) {
         age += dt;
         if (hitWall || hitCeiling || onGround || age > LIFETIME) kill();
     }
+
 
     @Override
     public void onCollide(Entity other, GameWorld world) {
@@ -37,6 +46,7 @@ public class EnemyBullet extends Entity {
             kill();
         }
     }
+
 
     @Override
     public void render(GraphicsContext gc, Camera cam) {
@@ -54,3 +64,5 @@ public class EnemyBullet extends Entity {
         gc.fillOval(sx + width * 0.25, sy + height * 0.2, width * 0.35, height * 0.35);
     }
 }
+
+

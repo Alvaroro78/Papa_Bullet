@@ -1,14 +1,18 @@
 package model;
 
+
 import javafx.geometry.Rectangle2D;
 
+
 import structures.HashTable;
+
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * CONTRATO 4 — lee un nivel de resources/assets/levels/{nombre}.json y crea las entidades.
@@ -25,7 +29,7 @@ import java.util.List;
  *   ]
  * }
  * </pre>
- * Letras: . aire | # suelo | = plataforma | P jugador | R/G/S policía porra/pistola/escudo |
+ * Letras: . aire | # suelo | = plataforma (las balas la atraviesan) | - plataforma blindada (frena balas) | P jugador | R/G/S policía porra/pistola/escudo |
  *         H helicóptero | B jefe | K King Papa | J zona de jetpack | F French Spikes | A Oil Slick (aceite)
  *
  *  - Filas de distinto largo se rellenan con aire a la derecha.
@@ -38,12 +42,16 @@ public final class LevelLoader {
     /** Mapa de reserva si aún no existe el .json de un nivel. */
     public static final String FALLBACK = "prueba";
 
+
     private static final String[] DEFAULT_NAMES = {"UVAVALLE", "AYTONOMA", "JABERUMBA", "ACESI"};
     private static final String ENTITY_LETTERS = "PRGSHBKJFA";
 
+
     private LevelLoader() {}
 
+
     public static int levelCount() { return LEVEL_FILES.length; }
+
 
     /** Carga el nivel número {@code index}; si su archivo no existe usa {@link #FALLBACK}. */
     public static Level loadIndex(int index) {
@@ -58,6 +66,7 @@ public final class LevelLoader {
         return lv;
     }
 
+
     /** Carga assets/levels/{name}.json; devuelve null si no existe. */
     public static Level load(String name) {
         try (InputStream in = LevelLoader.class.getResourceAsStream("/assets/levels/" + name + ".json")) {
@@ -67,6 +76,7 @@ public final class LevelLoader {
             throw new IllegalStateException("No se pudo leer el nivel " + name, e);
         }
     }
+
 
     /** Convierte el texto JSON de un nivel en un Level (público para poder probarlo sin archivo). */
     @SuppressWarnings("unchecked")
@@ -95,17 +105,21 @@ public final class LevelLoader {
         return parse(name instanceof String n ? n : defaultName(fileName), rows, hints);
     }
 
+
     /** Arma el Level a partir de las filas del mapa (sin mensajes de tutorial). */
     public static Level parse(String displayName, List<String> rowsText) {
         return parse(displayName, rowsText, List.of());
     }
 
+
     public static Level parse(String displayName, List<String> rowsText, List<Level.Hint> hints) {
         if (rowsText.isEmpty()) throw new IllegalArgumentException("Nivel vacío: " + displayName);
+
 
         int cols = rowsText.stream().mapToInt(String::length).max().getAsInt();
         int pad = Math.max(0, Config.VISIBLE_ROWS - rowsText.size());
         int rows = rowsText.size() + pad;
+
 
         char[][] tiles = new char[rows][cols];
         for (char[] r : tiles) java.util.Arrays.fill(r, '.');
@@ -113,12 +127,13 @@ public final class LevelLoader {
         List<int[]> jTiles = new ArrayList<>();
         boolean warned = false;
 
+
         for (int i = 0; i < rowsText.size(); i++) {
             String line = rowsText.get(i);
             int r = i + pad;
             for (int c = 0; c < line.length(); c++) {
                 char ch = line.charAt(c);
-                if (ch == '#' || ch == '=') tiles[r][c] = ch;
+                if (ch == '#' || ch == '=' || ch == '-') tiles[r][c] = ch;
                 else if (ch == 'J') jTiles.add(new int[]{c, r});
                 else if (ENTITY_LETTERS.indexOf(ch) >= 0) spawns.add(new Level.Spawn(ch, c, r));
                 else if (ch != '.' && ch != ' ' && !warned) {
@@ -130,6 +145,7 @@ public final class LevelLoader {
         List<Rectangle2D> zones = Level.mergeRuns(jTiles);
         return new Level(displayName, tiles, spawns, zones, hints);
     }
+
 
     /**
      * Crea una entidad por cada letra del mapa (usa {@link EntityRegistry}) y las coloca
@@ -149,6 +165,7 @@ public final class LevelLoader {
         return out;
     }
 
+
     private static String defaultName(String fileName) {
         for (int i = 0; i < LEVEL_FILES.length; i++) {
             if (LEVEL_FILES[i].equals(fileName)) return DEFAULT_NAMES[i];
@@ -156,3 +173,5 @@ public final class LevelLoader {
         return fileName.toUpperCase();
     }
 }
+
+

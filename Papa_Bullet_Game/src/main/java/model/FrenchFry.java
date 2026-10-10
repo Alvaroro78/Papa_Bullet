@@ -1,8 +1,10 @@
 package model;
 
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+
 
 /**
  * Las papas a la francesa. Dos modos:
@@ -15,6 +17,7 @@ public class FrenchFry extends Entity {
     private final boolean spike;
     private double age;
 
+
     public FrenchFry(double cx, double cy, double vx, double vy, boolean spike) {
         this.spike = spike;
         width = height = spike ? 8 : 20;
@@ -24,7 +27,9 @@ public class FrenchFry extends Entity {
         this.vy = vy;
         team = Team.PLAYER;
         collidesWithTiles = true;
+        projectile = true;
     }
+
 
     @Override
     public void update(double dt, GameWorld world) {
@@ -38,6 +43,7 @@ public class FrenchFry extends Entity {
         }
     }
 
+
     /** Se abre en abanico de ±40° alrededor de la dirección en que iba. */
     private void split(GameWorld world) {
         double base = Math.atan2(vy, vx);
@@ -48,9 +54,10 @@ public class FrenchFry extends Entity {
         kill();
     }
 
+
     @Override
     public void onCollide(Entity other, GameWorld world) {
-        if (other.getTeam() != Team.ENEMY) return;
+        if (other.getTeam() != Team.ENEMY || other.isProjectile()) return; // ignora las balas enemigas
         if (spike) {
             other.takeDamage(SPIKE_DAMAGE, this);
             kill();
@@ -58,6 +65,7 @@ public class FrenchFry extends Entity {
             split(world); // la caja choca antes de abrirse: se abre ahí mismo
         }
     }
+
 
     @Override
     public void render(GraphicsContext gc, Camera cam) {
@@ -80,3 +88,5 @@ public class FrenchFry extends Entity {
         gc.restore();
     }
 }
+
+
