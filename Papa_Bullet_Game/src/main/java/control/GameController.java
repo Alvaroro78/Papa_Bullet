@@ -9,6 +9,7 @@ import model.GameWorld;
 import model.InputHandler;
 import model.Overlay;
 import model.Entity;
+import model.Music;
 import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -146,6 +147,7 @@ public class GameController implements PauseHandler {
         if (!name.equals(shownLevelName)) {
             shownLevelName = name;
             levelLabel.setText("NIVEL " + world.getLevelIndex() + " · " + name);
+            Music.playLevel(world.getLevelIndex());
         }
         if (world.getState() == GameWorld.State.GAME_COMPLETE && world.getStateTime() > 4 && !leaving) {
             exitToMenu();
@@ -233,6 +235,7 @@ public class GameController implements PauseHandler {
         }
         paused = true;
         loop.stop();
+        Music.stop();
         input.clear();
         root.getChildren().add(pauseLayer);
     }
@@ -246,6 +249,7 @@ public class GameController implements PauseHandler {
         paused = false;
         input.clear();
         loop.start();
+        Music.resume();
     }
 
 

@@ -8,6 +8,7 @@ public class OilSlick implements Weapon {
 
     @Override
     public void fire(double x, double y, AimDirection dir, GameWorld world) {
+        Sounds.play("oilstilsound.wav");
         world.spawn(new OilPuddle(x, y, AimVector.dx(dir) * SPEED, AimVector.dy(dir) * SPEED - LIFT));
     }
 
