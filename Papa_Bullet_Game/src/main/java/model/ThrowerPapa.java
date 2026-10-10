@@ -8,6 +8,7 @@ public class ThrowerPapa implements Weapon {
 
     @Override
     public void fire(double x, double y, AimDirection dir, GameWorld world) {
+        Sounds.play("throwpapasound.wav");
         world.spawn(new PapaBomba(x, y, AimVector.dx(dir) * SPEED, AimVector.dy(dir) * SPEED - LIFT));
     }
 

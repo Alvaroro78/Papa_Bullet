@@ -15,6 +15,7 @@ import model.Level;
 import model.LevelLoader;
 import model.Player;
 import model.Sprites;
+import model.Music;
 
 
 import java.util.ArrayList;
@@ -33,7 +34,10 @@ public class MainMenuController {
 
     @FXML
     private void initialize() {
+
+        Music.play("menu music.mp3");
         paintScenery(background.getGraphicsContext2D(), true);
+
     }
 
 

@@ -8,6 +8,7 @@ public class FrenchSpikes implements Weapon {
 
     @Override
     public void fire(double x, double y, AimDirection dir, GameWorld world) {
+        Sounds.play("frenchspikessound.wav");
         world.spawn(new FrenchFry(x, y, AimVector.dx(dir) * SPEED, AimVector.dy(dir) * SPEED, false));
     }
 
