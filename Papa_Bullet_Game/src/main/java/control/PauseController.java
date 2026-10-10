@@ -5,7 +5,7 @@ import javafx.fxml.FXML;
 /**
  * [STUB DE P1 — P5 lo reemplaza/completa]
  * Controlador de Pause.fxml. Solo reenvía los clics al PauseHandler (GameController).
- * P5: añade el botón REINICIAR en Pause.fxml con onAction="#onRestartClicked" (el método ya existe).
+ * Pause.fxml ya tiene CONTINUAR, REINICIAR y SALIR conectados.
  */
 public class PauseController {
     private PauseHandler handler;

@@ -207,7 +207,7 @@ public class GameWorld {
     }
 
     public void render(GraphicsContext gc) {
-        gc.clearRect(0, 0, Config.WIDTH, Config.HEIGHT);
+        Background.render(gc, camera);
         level.render(gc, camera);
         for (Entity e : entities) e.render(gc, camera);
     }

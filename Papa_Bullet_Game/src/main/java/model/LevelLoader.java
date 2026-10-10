@@ -2,22 +2,29 @@ package model;
 
 import javafx.geometry.Rectangle2D;
 
-import java.io.BufferedReader;
+import structures.HashTable;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * CONTRATO 4 — lee un .txt de resources/assets/levels/ (una letra por baldosa de 40x40) y crea las entidades.
+ * CONTRATO 4 — lee un nivel de resources/assets/levels/{nombre}.json y crea las entidades.
  *
+ * <pre>
+ * {
+ *   "nombre": "UNIVALLE",            // lo que muestra el juego (opcional)
+ *   "mapa": [                        // una letra por baldosa de 40x40, una fila por texto
+ *     "#......#",
+ *     "########"
+ *   ]
+ * }
+ * </pre>
  * Letras: . aire | # suelo | = plataforma | P jugador | R/G/S policía porra/pistola/escudo |
  *         H helicóptero | B jefe | K King Papa | J zona de jetpack
  *
- * Extras (opcionales):
- *  - Una línea que empieza con ';' es comentario. ";nombre=Univalle" fija el nombre que ve el HUD.
  *  - Filas de distinto largo se rellenan con aire a la derecha.
  *  - Si el mapa tiene menos de 15 filas se rellena con aire ARRIBA (queda pegado al fondo).
  *  - Cualquier otro carácter se trata como aire (y se avisa por consola).
@@ -25,7 +32,7 @@ import java.util.List;
 public final class LevelLoader {
     /** Orden de los niveles del juego. */
     public static final String[] LEVEL_FILES = {"nivel0", "nivel1", "nivel2", "nivel3"};
-    /** Mapa de reserva si aún no existe el .txt de un nivel. */
+    /** Mapa de reserva si aún no existe el .json de un nivel. */
     public static final String FALLBACK = "prueba";
 
     private static final String[] DEFAULT_NAMES = {"UNIVALLE", "AYTONOMA", "JABERUMBA", "ACESI"};
@@ -40,42 +47,42 @@ public final class LevelLoader {
         String file = LEVEL_FILES[index];
         Level lv = load(file);
         if (lv == null) {
-            System.err.println("[LevelLoader] Falta " + file + ".txt, uso " + FALLBACK + ".txt");
+            System.err.println("[LevelLoader] Falta " + file + ".json, uso " + FALLBACK + ".json");
             lv = load(FALLBACK);
         }
-        if (lv == null) throw new IllegalStateException("No hay ni " + file + ".txt ni " + FALLBACK + ".txt");
+        if (lv == null) throw new IllegalStateException("No hay ni " + file + ".json ni " + FALLBACK + ".json");
         return lv;
     }
 
-    /** Carga assets/levels/{name}.txt; devuelve null si no existe. */
+    /** Carga assets/levels/{name}.json; devuelve null si no existe. */
     public static Level load(String name) {
-        try (InputStream in = LevelLoader.class.getResourceAsStream("/assets/levels/" + name + ".txt")) {
+        try (InputStream in = LevelLoader.class.getResourceAsStream("/assets/levels/" + name + ".json")) {
             if (in == null) return null;
-            List<String> lines = new ArrayList<>();
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = br.readLine()) != null) lines.add(line);
-            }
-            return parse(name, lines);
+            return fromJson(name, new String(in.readAllBytes(), StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new IllegalStateException("No se pudo leer el nivel " + name, e);
         }
     }
 
-    /** Convierte las líneas de un .txt en un Level (público para poder probarlo con texto). */
-    public static Level parse(String fileName, List<String> lines) {
-        String displayName = defaultName(fileName);
-        List<String> rowsText = new ArrayList<>();
-        for (String raw : lines) {
-            String line = raw.replace("\r", "");
-            if (line.startsWith(";")) {
-                String meta = line.substring(1).trim();
-                if (meta.toLowerCase().startsWith("nombre=")) displayName = meta.substring(7).trim();
-            } else if (!line.isBlank()) {
-                rowsText.add(line);
-            }
+    /** Convierte el texto JSON de un nivel en un Level (público para poder probarlo sin archivo). */
+    @SuppressWarnings("unchecked")
+    public static Level fromJson(String fileName, String json) {
+        if (!(JsonReader.parse(json) instanceof HashTable<?, ?> raw)) {
+            throw new IllegalArgumentException(fileName + ".json debe ser un objeto { \"nombre\": ..., \"mapa\": [...] }");
         }
-        if (rowsText.isEmpty()) throw new IllegalArgumentException("Nivel vacío: " + fileName);
+        HashTable<String, Object> obj = (HashTable<String, Object>) raw;
+        if (!(obj.get("mapa") instanceof List<?> mapa)) {
+            throw new IllegalArgumentException(fileName + ".json no tiene \"mapa\" (lista de filas de texto)");
+        }
+        List<String> rows = new ArrayList<>();
+        for (Object row : mapa) rows.add(String.valueOf(row));
+        Object name = obj.get("nombre");
+        return parse(name instanceof String n ? n : defaultName(fileName), rows);
+    }
+
+    /** Arma el Level a partir de las filas del mapa. */
+    public static Level parse(String displayName, List<String> rowsText) {
+        if (rowsText.isEmpty()) throw new IllegalArgumentException("Nivel vacío: " + displayName);
 
         int cols = rowsText.stream().mapToInt(String::length).max().getAsInt();
         int pad = Math.max(0, Config.VISIBLE_ROWS - rowsText.size());
@@ -96,7 +103,7 @@ public final class LevelLoader {
                 else if (ch == 'J') jTiles.add(new int[]{c, r});
                 else if (ENTITY_LETTERS.indexOf(ch) >= 0) spawns.add(new Level.Spawn(ch, c, r));
                 else if (ch != '.' && ch != ' ' && !warned) {
-                    System.err.println("[LevelLoader] " + fileName + ": carácter desconocido '" + ch + "' (fila " + (i + 1) + ", col " + (c + 1) + ") => aire");
+                    System.err.println("[LevelLoader] " + displayName + ": carácter desconocido '" + ch + "' (fila " + (i + 1) + ", col " + (c + 1) + ") => aire");
                     warned = true;
                 }
             }

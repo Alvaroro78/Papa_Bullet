@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Text?>
 
 <!-- Vista Game: contenedor donde viven todos los niveles.
-     Capas (de atrás hacia adelante): mosaico -> entidades -> HUD -->
+     Capas (de atrás hacia adelante): Canvas del juego -> HUD -->
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
            fx:id="root"
@@ -20,8 +20,9 @@
             StackPane.alignment="TOP_LEFT"/>
 
     <!-- Capa 2: HUD, siempre encima -->
+    <!-- Arriba a la izquierda dibuja el Hud (1P, vida, armas); el nombre del nivel va al centro -->
     <Text fx:id="levelLabel" styleClass="hud-text" text="NIVEL 1"
-          StackPane.alignment="TOP_LEFT" translateX="16" translateY="16"/>
+          StackPane.alignment="TOP_CENTER" translateY="22"/>
 
     <Button fx:id="pauseButton" styleClass="wood-button"
             onAction="#onPauseClicked"

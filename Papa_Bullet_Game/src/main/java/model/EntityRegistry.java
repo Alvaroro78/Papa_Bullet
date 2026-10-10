@@ -1,9 +1,8 @@
 package model;
 
 import javafx.scene.paint.Color;
+import structures.HashTable;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -18,7 +17,7 @@ import java.util.function.Supplier;
  * constructor con {@code EntityRegistry.currentLevelIndex()}.
  */
 public final class EntityRegistry {
-    private static final Map<Character, Supplier<Entity>> FACTORIES = new HashMap<>();
+    private static final HashTable<Character, Supplier<Entity>> FACTORIES = new HashTable<>();
     private static int currentLevelIndex;
 
     static {

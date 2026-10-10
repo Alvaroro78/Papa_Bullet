@@ -7,9 +7,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -22,12 +21,13 @@ import java.util.List;
  */
 public class Player extends Entity {
 
-    // ---- Ajustes: cámbienlos probando en PlayerSandbox ----
+    // ---- Ajustes: cámbienlos probando en el juego (F1 muestra las cajas de colisión) ----
     public static final double WIDTH = 36, HEIGHT = 60, CROUCH_HEIGHT = 36;
     public static final double SPEED = 200, JUMP_SPEED = 700;
     public static final double JETPACK_HOLD = 3.0, JETPACK_SPEED = 350;
     public static final double INVULNERABLE_TIME = 1.0;
-    public static final int MAX_HP = 3, RECHARGE = 150;
+    /** Vida. Los enemigos de P4 quitan del orden de 25-50 por golpe; el King Papa devuelve 150. */
+    public static final int MAX_HP = 300, RECHARGE = 150;
     public static String selectedSkin = "PJ";
 
     private static final KeyCode KEY_LEFT = KeyCode.A, KEY_RIGHT = KeyCode.D, KEY_UP = KeyCode.W,
@@ -48,8 +48,6 @@ public class Player extends Entity {
     private Rectangle2D jetZone;   // zona encima: se dibuja la mira roja
     private Rectangle2D flyTarget; // != null mientras el jetpack lo lleva
     private double jetCharge;
-
-    private int reserve; // lo que da el King Papa (+150): qué es exactamente sigue pendiente en el doc
 
     /** skin = prefijo de los sprites, ej. "PJ" carga PJ_1.png, PJ_2.png... de /assets/sprites/ */
     public Player() {
@@ -126,17 +124,18 @@ public class Player extends Entity {
             jetCharge = 0;
         }
 
-        // 5. Recarga: una vez por King Papa
+        // 5. Recarga de vida: una vez por King Papa (si ya está lleno no lo gasta)
         if (recharge) {
             for (KingPapa k : world.getKingPapas()) {
-                if (k.isUsed() && k.getBounds().intersects(getBounds())) {
-                    reserve += RECHARGE;
+                if (!k.isUsed() && hp < MAX_HP && k.getBounds().intersects(getBounds())) {
+                    k.markUsed();
+                    hp = Math.min(MAX_HP, hp + RECHARGE);
                     break;
                 }
             }
         }
 
-        // 6. Física
+        // 6. La física (gravedad y baldosas) la aplica el motor con Collision después de update()
         walkTime = (onGround && vx != 0) ? walkTime + dt : 0;
     }
 
@@ -162,10 +161,8 @@ public class Player extends Entity {
     }
 
     // =====================================================================
-    // Movimiento y colisiones con las baldosas
-    // ponytail: la colisión vive aquí; si P4 la necesita para los enemigos, P1 la sube a Entity.
+    // Agacharse y bajar de plataformas (el resto de la colisión está en Collision)
     // =====================================================================
-
 
     /** true si está parado solo sobre plataformas '=' (de un piso sólido no se puede bajar). */
     private boolean onPlatformOnly(Level level) {
@@ -240,6 +237,11 @@ public class Player extends Entity {
         weapons.add(weapon);
     }
 
+    /** Todas las armas recogidas, en orden (para el HUD). */
+    public List<Weapon> getWeapons() {
+        return Collections.unmodifiableList(weapons);
+    }
+
     public Weapon getCurrentWeapon() {
         return weapons.isEmpty() ? null : weapons.get(weaponIndex);
     }
@@ -248,10 +250,7 @@ public class Player extends Entity {
     private double muzzleY() { return y + height * 0.4 + AimVector.dy(aim) * height * 0.5; }
 
     public AimDirection getAim() { return aim; }
-    public int getReserve() { return reserve; }
     public boolean isFlying() { return flyTarget != null; }
-
-    /** true solo en el frame en que la tecla se oprime (para no disparar 60 veces por segundo). */
 
     // =====================================================================
     // Dibujo
@@ -295,15 +294,12 @@ public class Player extends Entity {
         }
     }
 
+    /** Carga skin_1.png, skin_2.png... hasta que falte uno. Sprites los escala y los guarda en caché. */
     private static Image[] loadFrames(String skin) {
         List<Image> list = new ArrayList<>();
-        for (int i = 1; ; i++) {
-            try (InputStream in = Player.class.getResourceAsStream("/assets/sprites/" + skin + "_" + i + ".png")) {
-                if (in == null) break;
-                list.add(new Image(in));
-            } catch (IOException e) {
-                break;
-            }
+        for (int i = 1; Player.class.getResource("/assets/sprites/" + skin + "_" + i + ".png") != null; i++) {
+            Image img = Sprites.get(skin + "_" + i + ".png", HEIGHT * 2.4, HEIGHT * 1.2); // alto de dibujo: height * 1.2
+            if (img != null) list.add(img);
         }
         return list.toArray(new Image[0]);
     }
