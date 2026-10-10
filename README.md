@@ -157,3 +157,8 @@ El equipo documentó cómo se construyó el juego y qué papel tuvo la IA:
 ## Equipo
 
 **Los 4 fantasticos + 1** — evento **AI_GAME_JAM**, proyecto **GameHub-CIS**.
+
+## Playthrough
+
+https://drive.google.com/file/d/1xihT7pANEKluvspZta81B9pA6awfpQms/view?usp=drive_link
+
