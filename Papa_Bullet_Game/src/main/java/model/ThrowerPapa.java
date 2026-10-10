@@ -9,6 +9,7 @@ public class ThrowerPapa implements Weapon {
         world.spawn(new PapaBomba(x, y, AimVector.dx(dir) * SPEED, AimVector.dy(dir) * SPEED - LIFT));
     }
 
+    @Override public double getCooldown() { return 0.6; }
     @Override public String getName() { return "Thrower Papa"; }
     @Override public String getIcon() { return "PapaBomba.png"; }
 }

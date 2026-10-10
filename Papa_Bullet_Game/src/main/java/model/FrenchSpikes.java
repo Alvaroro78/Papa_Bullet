@@ -9,6 +9,7 @@ public class FrenchSpikes implements Weapon {
         world.spawn(new FrenchFry(x, y, AimVector.dx(dir) * SPEED, AimVector.dy(dir) * SPEED, false));
     }
 
+    @Override public double getCooldown() { return 0.9; } // cada disparo son 5 espinas
     @Override public String getName() { return "French Spikes"; }
     @Override public String getIcon() { return "FrenchSpikes.png"; }
 }

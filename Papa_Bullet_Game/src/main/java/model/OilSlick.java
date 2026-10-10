@@ -9,6 +9,7 @@ public class OilSlick implements Weapon {
         world.spawn(new OilPuddle(x, y, AimVector.dx(dir) * SPEED, AimVector.dy(dir) * SPEED - LIFT));
     }
 
+    @Override public double getCooldown() { return 1.4; } // el charco dura 5 s quemando
     @Override public String getName() { return "Oil Slick"; }
     @Override public String getIcon() { return "CharcoAceite.png"; }
 }

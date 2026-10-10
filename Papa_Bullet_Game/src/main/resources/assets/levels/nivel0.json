@@ -25,7 +25,7 @@
     { "col": 31, "texto": "Sube a las plataformas  ·  S + L para bajarte" },
     { "col": 38, "texto": "El aceite (Oil Slick) quema a quien lo pise" },
     { "col": 44, "texto": "King Papa: párate en la freidora y presiona Ñ (+150 de vida)" },
-    { "col": 50, "texto": "Bajo la zona: mira arriba (W) y mantén O 3 segundos = jetpack" },
+    { "col": 50, "texto": "Jetpack: mira arriba (W) y mantén O 3 segundos para subir a la plataforma" },
     { "col": 63, "texto": "¡El jefe! Destrúyelo para terminar el nivel" }
   ]
 }

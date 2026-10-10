@@ -26,6 +26,7 @@ public class Player extends Entity {
     public static final double WIDTH = 36, HEIGHT = 60, CROUCH_HEIGHT = 36;
     public static final double SPEED = 200, JUMP_SPEED = 700;
     public static final double JETPACK_HOLD = 3.0, JETPACK_SPEED = 350;
+    public static final int JETPACK_REACH = 8, JETPACK_BOOST = 4; // baldosas: hasta dónde busca piso arriba / cuánto sube si no hay
     public static final double INVULNERABLE_TIME = 1.0;
     /** Vida. Los enemigos de P4 quitan del orden de 25-50 por golpe; el King Papa devuelve 150. */
     public static final int MAX_HP = 300, RECHARGE = 150;
@@ -45,12 +46,12 @@ public class Player extends Entity {
     private int facing = 1; // 1 derecha, -1 izquierda
     private AimDirection aim = AimDirection.RIGHT;
     private boolean crouching;
-    private double invulnerable, walkTime;
+    private double invulnerable, walkTime, fireCooldown;
 
     private final List<Weapon> weapons = new ArrayList<>();
     private int weaponIndex;
 
-    private Rectangle2D jetZone;   // zona encima: se dibuja la mira roja
+    private Rectangle2D jetZone;   // dónde quedaría al volar (caja del jugador): ahí se dibuja la mira roja
     private Rectangle2D flyTarget; // != null mientras el jetpack lo lleva
     private double jetCharge;
 
@@ -80,7 +81,8 @@ public class Player extends Entity {
     public void update(double dt, GameWorld world) {
         InputHandler input = world.getInput();
         invulnerable = Math.max(0, invulnerable - dt);
-        boolean jump = input.wasPressed(KEY_JUMP), shoot = input.wasPressed(KEY_SHOOT), swap = input.wasPressed(KEY_SWITCH);
+        fireCooldown = Math.max(0, fireCooldown - dt);
+        boolean jump = input.wasPressed(KEY_JUMP), shoot = input.isPressed(KEY_SHOOT), swap = input.wasPressed(KEY_SWITCH);
         boolean recharge = input.wasTyped(KEY_RECHARGE);
 
         if (flyTarget != null) {
@@ -113,10 +115,14 @@ public class Player extends Entity {
 
         // 3. Armas
         if (swap && !weapons.isEmpty()) weaponIndex = (weaponIndex + 1) % weapons.size();
-        if (shoot && !weapons.isEmpty()) weapons.get(weaponIndex).fire(muzzleX(), muzzleY(), aim, world);
+        if (shoot && fireCooldown == 0 && !weapons.isEmpty()) { // K sostenida dispara al ritmo del arma
+            Weapon w = weapons.get(weaponIndex);
+            w.fire(muzzleX(), muzzleY(), aim, world);
+            fireCooldown = w.getCooldown();
+        }
 
-        // 4. Jetpack: en el piso, bajo una zona J, mirando arriba y manteniendo O
-        jetZone = (onGround && aim == AimDirection.UP) ? zoneAbove(world) : null;
+        // 4. Jetpack: en cualquier parte del piso, mirando arriba y manteniendo O
+        jetZone = (onGround && aim == AimDirection.UP) ? landingAbove(world.getLevel()) : null;
         if (jetZone != null && input.isPressed(KEY_JETPACK)) {
             jetCharge += dt;
             if (jetCharge >= JETPACK_HOLD) {
@@ -200,18 +206,31 @@ public class Player extends Entity {
     // Jetpack
     // =====================================================================
 
-    /** La zona J más cercana justo encima de la cabeza, o null. */
-    private Rectangle2D zoneAbove(GameWorld world) {
-        double cx = x + width / 2;
-        Rectangle2D best = null;
-        for (Rectangle2D z : world.getLevel().getJetpackZones()) {
-            boolean above = cx >= z.getMinX() && cx <= z.getMaxX() && z.getMaxY() <= y;
-            if (above && (best == null || z.getMaxY() > best.getMaxY())) best = z;
+    /**
+     * A dónde lo lleva el jetpack: el piso más cercano encima de su cabeza (plataforma '=' o bloque '#'
+     * con espacio libre arriba para pararse), hasta JETPACK_REACH baldosas. Si no hay ninguno,
+     * sube JETPACK_BOOST baldosas y después cae. Devuelve la caja que ocuparía el jugador al llegar.
+     */
+    Rectangle2D landingAbove(Level level) {
+        int T = Config.TILE;
+        int c0 = tile(x), c1 = tile(x + width - 0.001), head = tile(y);
+        for (int r = head - 1; r >= head - JETPACK_REACH; r--) {
+            if (standable(level, c0, c1, r)) return new Rectangle2D(x, r * T - height, width, height);
         }
-        return best;
+        return new Rectangle2D(x, y - JETPACK_BOOST * T, width, height);
     }
 
-    /** Vuela en línea recta hasta dejar los pies en el borde de abajo de la zona. Ignora baldosas. */
+    /** ¿En la fila r hay algo que pisar y encima 2 filas libres (el jugador mide 1.5 baldosas)? */
+    private static boolean standable(Level level, int c0, int c1, int r) {
+        boolean floor = false;
+        for (int c = c0; c <= c1; c++) {
+            if (level.isSolid(c, r - 1) || level.isSolid(c, r - 2)) return false;
+            floor |= level.isSolid(c, r) || level.isPlatform(c, r);
+        }
+        return floor;
+    }
+
+    /** Vuela en línea recta hasta dejar los pies en el borde de abajo del destino. Ignora baldosas. */
     private void fly(double dt) {
         double tx = flyTarget.getMinX() + flyTarget.getWidth() / 2 - width / 2;
         double ty = flyTarget.getMaxY() - height;

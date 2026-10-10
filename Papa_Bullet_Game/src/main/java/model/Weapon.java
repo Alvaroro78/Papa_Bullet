@@ -8,6 +8,9 @@ public interface Weapon {
     /** (x, y) = boca del arma en coordenadas del mundo. */
     void fire(double x, double y, AimDirection dir, GameWorld world);
 
+    /** Segundos mínimos entre un disparo y el siguiente (más alto = más difícil). */
+    double getCooldown();
+
     /** Nombre para el HUD. */
     String getName();
 
