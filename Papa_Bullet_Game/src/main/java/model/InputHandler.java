@@ -5,6 +5,8 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,6 +23,8 @@ public class InputHandler {
     private final Set<KeyCode> down = new HashSet<>();
     private final Set<KeyCode> pressedThisFrame = new HashSet<>();
     private final Set<String> typedThisFrame = new HashSet<>();
+    private final Map<KeyCode, Long> order = new HashMap<>();
+    private long counter;
 
     private final EventHandler<KeyEvent> onPressed = e -> press(e.getCode());
     private final EventHandler<KeyEvent> onReleased = e -> release(e.getCode());
@@ -56,14 +60,18 @@ public class InputHandler {
         return typedThisFrame.contains(character.toLowerCase());
     }
 
+    public long pressOrder(KeyCode code) {
+        return order.getOrDefault(code, Long.MAX_VALUE);
+    }
+
     // --- alimentación (la usa el motor; público para poder probar sin ventana) ---
 
     public void press(KeyCode code) {
-        if (code != null && down.add(code)) pressedThisFrame.add(code);
+        if (code != null && down.add(code)) {pressedThisFrame.add(code); order.put(code, counter++);}
     }
 
     public void release(KeyCode code) {
-        if (code != null) down.remove(code);
+        if (code != null) { down.remove(code);order.remove(code);}
     }
 
     public void type(String character) {
@@ -79,6 +87,7 @@ public class InputHandler {
     /** Suelta todo (al pausar o al perder el foco, para que no queden teclas "pegadas"). */
     public void clear() {
         down.clear();
+        order.clear();
         pressedThisFrame.clear();
         typedThisFrame.clear();
     }

@@ -29,7 +29,7 @@ public final class EntityRegistry {
 
     private static void registerDefaults() {
         // --- P2 ---
-        register('P', DebugPlayer::new);
+        register('P', Player::new);
         // --- P4 ---
         register('R', () -> new PlaceholderEntity("R", Color.web("#2f4f9f"), 30, 52, 3, false, false));
         register('G', () -> new PlaceholderEntity("G", Color.web("#3a6fbf"), 30, 52, 3, false, false));
